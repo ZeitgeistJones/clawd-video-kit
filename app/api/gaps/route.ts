@@ -48,5 +48,5 @@ Return ONLY valid JSON in this exact format, no explanation:
     return NextResponse.json(result)
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
-  }
+  
 }
