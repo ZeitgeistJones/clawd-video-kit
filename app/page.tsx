@@ -39,22 +39,24 @@ export default function Home() {
     setLoadingGaps(true)
     setError('')
     try {
-      const [reposRes, videosRes] = await Promise.all([
-        fetch('/api/repos'),
-        fetch('/api/videos'),
-      ])
-      const { repos } = await reposRes.json()
-      const { videos } = await videosRes.json()
+      const reposRes = await fetch('/api/repos')
+      const reposData = await reposRes.json()
+      if (!reposData.repos) throw new Error('Repos error: ' + JSON.stringify(reposData))
+
+      const videosRes = await fetch('/api/videos')
+      const videosData = await videosRes.json()
+      if (!videosData.videos) throw new Error('Videos error: ' + JSON.stringify(videosData))
 
       const gapsRes = await fetch('/api/gaps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repos, videos }),
+        body: JSON.stringify({ repos: reposData.repos, videos: videosData.videos }),
       })
-      const { gaps: gapData } = await gapsRes.json()
-      setGaps(gapData || [])
+      const gapsData = await gapsRes.json()
+      if (!gapsData.gaps) throw new Error('Gaps error: ' + JSON.stringify(gapsData))
+      setGaps(gapsData.gaps || [])
     } catch (e: any) {
-      setError('Gap analysis failed — check your API keys')
+      setError(e.message || 'Gap analysis failed')
     }
     setLoadingGaps(false)
   }
