@@ -33,20 +33,3 @@ Return ONLY valid JSON in this exact format, no explanation:
       "priority": "high" | "medium" | "low"
     }
   ]
-}`
-
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4000,
-      messages: [{ role: 'user', content: prompt }],
-    })
-
-    const text = response.content[0].type === 'text' ? response.content[0].text : ''
-    const clean = text.replace(/```json|```/g, '').trim()
-    const result = JSON.parse(clean)
-
-    return NextResponse.json(result)
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
-  
-}
