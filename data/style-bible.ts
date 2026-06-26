@@ -1,12 +1,19 @@
 export const STYLE_BIBLE = `
 == PRODUCTION NOTES — READ BEFORE GENERATING ==
 
+FORMAT & DURATION
+- Target duration: 5-6 minutes
+- Format: explainer video, not a tutorial
+- Pacing: fast and energetic — don't linger on technical details
+- Visuals should be fun and engaging throughout to maintain audience retention
+
 NARRATOR PERSONA
-- Enthusiastic community member, not a corporate voice
-- Benevolent teacher: educational, direct, honest about risks
-- Peer-to-peer tone — chill, fun, personable
+- Chill, bro, funny — like an enthusiastic community member hyped about what they're seeing
+- Benevolent teacher vibes: educational but never condescending
+- Peer-to-peer, not corporate — talk to the audience like a friend who just discovered something cool
 - Explain it like the audience is smart but not a developer
-- Use relatable analogies over dense jargon
+- Use relatable analogies over dense jargon — think "Lego blocks" not "modular architecture"
+- Sound genuinely excited about the speed and quality of what's being built
 
 FRAMING PHILOSOPHY
 - Frame every development through the lens of "Infrastructure over Participant"
@@ -34,6 +41,7 @@ FORBIDDEN FRAMING
 - Never frame human oversight as a liability
 - Never say the agent did something "without needing humans" as a positive
 - Autonomy is a feature of the tool, not a criticism of human process
+- Never prop up AI by putting humans down
 `.trim()
 
 export const META_RESEARCH_HOOK = `
