@@ -1,8 +1,4 @@
 import { NextResponse } from 'next/server'
-import { execSync } from 'child_process'
-import { writeFileSync, readFileSync, unlinkSync } from 'fs'
-import { join } from 'path'
-import { tmpdir } from 'os'
 
 export const maxDuration = 60
 
@@ -10,29 +6,27 @@ export async function POST(req: Request) {
   try {
     const { repoName } = await req.json()
     const repoUrl = `https://github.com/clawdbotatg/${repoName}`
-    const outputPath = join(tmpdir(), `repomix-${repoName}-${Date.now()}.txt`)
 
-    try {
-      execSync(
-        `npx repomix --remote ${repoUrl} --output ${outputPath} --style plain`,
-        {
-          timeout: 50000,
-          env: {
-            ...process.env,
-            GITHUB_TOKEN: process.env.GITHUB_TOKEN,
-          },
-        }
-      )
-    } catch (execErr: any) {
-      throw new Error(`Repomix failed: ${execErr.message}`)
-    }
+    // Use repomix programmatic API instead of CLI
+    const { runCli } = await import('repomix')
+    const os = await import('os')
+    const path = await import('path')
+    const fs = await import('fs')
 
-    const packed = readFileSync(outputPath, 'utf-8')
+    const outputPath = path.join(os.tmpdir(), `repomix-${repoName}-${Date.now()}.txt`)
 
-    try { unlinkSync(outputPath) } catch {}
+    await runCli([
+      '--remote', repoUrl,
+      '--output', outputPath,
+      '--style', 'plain',
+    ], process.cwd())
 
-    // trim to ~100k chars to stay within Claude context
-    const trimmed = packed.length > 100000 ? packed.slice(0, 100000) + '\n\n[truncated for length]' : packed
+    const packed = fs.readFileSync(outputPath, 'utf-8')
+    try { fs.unlinkSync(outputPath) } catch {}
+
+    const trimmed = packed.length > 100000
+      ? packed.slice(0, 100000) + '\n\n[truncated for length]'
+      : packed
 
     return NextResponse.json({ packed: trimmed, repoName, repoUrl })
   } catch (err: any) {
