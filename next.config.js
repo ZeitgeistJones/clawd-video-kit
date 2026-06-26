@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  serverExternalPackages: ['repomix'],
-}
+const nextConfig = {}
 
 module.exports = nextConfig
