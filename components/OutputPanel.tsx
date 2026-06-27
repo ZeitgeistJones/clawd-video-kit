@@ -5,11 +5,14 @@ import { useState } from 'react'
 type Props = {
   notebookDoc: string
   youtubeDesc: string
+  thumbnailPrompt?: string
+  pfpImage?: string
+  pfpPrompt?: string
   repoName: string
   onMarkCovered: (repoName: string, videoUrl: string) => void
 }
 
-function CopyBlock({ label, content }: { label: string; content: string }) {
+function CopyBlock({ label, content, note }: { label: string; content: string; note?: string }) {
   const [copied, setCopied] = useState(false)
 
   function copy() {
@@ -33,9 +36,12 @@ function CopyBlock({ label, content }: { label: string; content: string }) {
         borderBottom: '1px solid var(--border)',
         background: 'var(--surface-2)',
       }}>
-        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-          {label}
-        </span>
+        <div>
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+            {label}
+          </span>
+          {note && <span style={{ fontSize: 11, color: 'var(--text-dim)', marginLeft: 8 }}>{note}</span>}
+        </div>
         <button
           onClick={copy}
           style={{
@@ -70,7 +76,7 @@ function CopyBlock({ label, content }: { label: string; content: string }) {
   )
 }
 
-export default function OutputPanel({ notebookDoc, youtubeDesc, repoName, onMarkCovered }: Props) {
+export default function OutputPanel({ notebookDoc, youtubeDesc, thumbnailPrompt, pfpImage, pfpPrompt, repoName, onMarkCovered }: Props) {
   const [videoUrl, setVideoUrl] = useState('')
   const [marked, setMarked] = useState(false)
 
@@ -79,10 +85,73 @@ export default function OutputPanel({ notebookDoc, youtubeDesc, repoName, onMark
     setMarked(true)
   }
 
+  function downloadPfp() {
+    if (!pfpImage) return
+    const link = document.createElement('a')
+    link.href = pfpImage.startsWith('data:') ? pfpImage : `data:image/png;base64,${pfpImage}`
+    link.download = `clawd-pfp-${repoName}.png`
+    link.click()
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <CopyBlock label="notebooklm source doc" content={notebookDoc} />
       <CopyBlock label="youtube description" content={youtubeDesc} />
+
+      {thumbnailPrompt && (
+        <CopyBlock
+          label="thumbnail prompt"
+          content={thumbnailPrompt}
+          note="paste into ChatGPT or Perplexity with the mascot image attached"
+        />
+      )}
+
+      {pfpImage && (
+        <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius)',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 14px',
+            borderBottom: '1px solid var(--border)',
+            background: 'var(--surface-2)',
+          }}>
+            <div>
+              <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                clawd mascot
+              </span>
+              {pfpPrompt && <span style={{ fontSize: 11, color: 'var(--text-dim)', marginLeft: 8 }}>"{pfpPrompt}"</span>}
+            </div>
+            <button
+              onClick={downloadPfp}
+              style={{
+                background: 'var(--accent-dim)',
+                color: 'var(--accent)',
+                border: '1px solid var(--accent)',
+                borderRadius: 4,
+                padding: '3px 10px',
+                fontSize: 11,
+                cursor: 'pointer',
+                fontFamily: 'var(--font)',
+              }}
+            >
+              download
+            </button>
+          </div>
+          <div style={{ padding: 14, display: 'flex', justifyContent: 'center' }}>
+            <img
+              src={pfpImage.startsWith('data:') ? pfpImage : `data:image/png;base64,${pfpImage}`}
+              alt="clawd mascot"
+              style={{ maxWidth: 300, borderRadius: 8 }}
+            />
+          </div>
+        </div>
+      )}
 
       <div style={{
         background: 'var(--surface)',

@@ -26,7 +26,13 @@ export default function Home() {
   const [loadingGaps, setLoadingGaps] = useState(false)
   const [selectedRepo, setSelectedRepo] = useState<string>('')
   const [generating, setGenerating] = useState(false)
-  const [output, setOutput] = useState<{ notebookDoc: string; youtubeDesc: string } | null>(null)
+  const [output, setOutput] = useState<{
+    notebookDoc: string
+    youtubeDesc: string
+    thumbnailPrompt?: string
+    pfpImage?: string
+    pfpPrompt?: string
+  } | null>(null)
   const [drafts, setDrafts] = useState<Draft[]>([])
   const [error, setError] = useState('')
 
@@ -65,6 +71,8 @@ export default function Home() {
     repoName: string
     includeMetaHook: boolean
     previousVideoDescription: string
+    generatePfp: boolean
+    extraContext: string
   }) {
     setGenerating(true)
     setError('')
@@ -87,12 +95,31 @@ export default function Home() {
           repoUrl,
           includeMetaHook: opts.includeMetaHook,
           previousVideoDescription: opts.previousVideoDescription,
+          extraContext: opts.extraContext,
         }),
       })
-      const { notebookDoc, youtubeDesc, error: genErr } = await genRes.json()
+      const { notebookDoc, youtubeDesc, thumbnailPrompt, error: genErr } = await genRes.json()
       if (genErr) throw new Error(genErr)
 
-      setOutput({ notebookDoc, youtubeDesc })
+      let pfpImage: string | undefined
+      let pfpPrompt: string | undefined
+
+      if (opts.generatePfp) {
+        const pfpRes = await fetch('/api/pfp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ repoName: opts.repoName, notebookDoc }),
+        })
+        const pfpData = await pfpRes.json()
+        if (pfpData.imageData) {
+          pfpImage = pfpData.imageData
+          pfpPrompt = pfpData.prompt
+        } else if (pfpData.error) {
+          setError('PFP generation failed: ' + pfpData.error)
+        }
+      }
+
+      setOutput({ notebookDoc, youtubeDesc, thumbnailPrompt, pfpImage, pfpPrompt })
 
       const draft: Draft = {
         repoName: opts.repoName,
@@ -162,6 +189,9 @@ export default function Home() {
             <OutputPanel
               notebookDoc={output.notebookDoc}
               youtubeDesc={output.youtubeDesc}
+              thumbnailPrompt={output.thumbnailPrompt}
+              pfpImage={output.pfpImage}
+              pfpPrompt={output.pfpPrompt}
               repoName={selectedRepo}
               onMarkCovered={markCovered}
             />

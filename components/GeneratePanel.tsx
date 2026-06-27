@@ -9,6 +9,8 @@ type Props = {
     repoName: string
     includeMetaHook: boolean
     previousVideoDescription: string
+    generatePfp: boolean
+    extraContext: string
   }) => void
   generating: boolean
 }
@@ -17,10 +19,18 @@ export default function GeneratePanel({ selectedRepo, onRepoChange, onGenerate, 
   const [includeMetaHook, setIncludeMetaHook] = useState(false)
   const [previousVideoDescription, setPreviousVideoDescription] = useState('')
   const [showPrevious, setShowPrevious] = useState(false)
+  const [generatePfp, setGeneratePfp] = useState(false)
+  const [extraContext, setExtraContext] = useState('')
 
   function handleGenerate() {
     if (!selectedRepo.trim()) return
-    onGenerate({ repoName: selectedRepo.trim(), includeMetaHook, previousVideoDescription })
+    onGenerate({
+      repoName: selectedRepo.trim(),
+      includeMetaHook,
+      previousVideoDescription,
+      generatePfp,
+      extraContext,
+    })
   }
 
   return (
@@ -56,6 +66,30 @@ export default function GeneratePanel({ selectedRepo, onRepoChange, onGenerate, 
         />
       </div>
 
+      <div style={{ marginBottom: 14 }}>
+        <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
+          extra context <span style={{ color: 'var(--text-dim)' }}>(optional — anything not in the repo)</span>
+        </label>
+        <textarea
+          value={extraContext}
+          onChange={e => setExtraContext(e.target.value)}
+          placeholder="e.g. clawd tweeted this was built in response to X... the community was asking for this in Telegram... this connects to the upcoming launch of Y..."
+          rows={3}
+          style={{
+            width: '100%',
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border-strong)',
+            borderRadius: 'var(--radius)',
+            padding: '8px 12px',
+            color: 'var(--text)',
+            fontSize: 12,
+            fontFamily: 'var(--font)',
+            outline: 'none',
+            resize: 'vertical',
+          }}
+        />
+      </div>
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
           <input
@@ -78,6 +112,18 @@ export default function GeneratePanel({ selectedRepo, onRepoChange, onGenerate, 
           />
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
             episode continuity <span style={{ color: 'var(--text-dim)' }}>(paste previous video description)</span>
+          </span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={generatePfp}
+            onChange={e => setGeneratePfp(e.target.checked)}
+            style={{ accentColor: 'var(--accent)', width: 14, height: 14 }}
+          />
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            generate mascot pfp <span style={{ color: 'var(--text-dim)' }}>(burns 1000 CLAWD)</span>
           </span>
         </label>
       </div>
@@ -122,7 +168,7 @@ export default function GeneratePanel({ selectedRepo, onRepoChange, onGenerate, 
           opacity: !selectedRepo.trim() ? 0.4 : 1,
         }}
       >
-        {generating ? 'packing repo + generating...' : '⚡ generate doc + description'}
+        {generating ? 'generating...' : '⚡ generate doc + description'}
       </button>
     </div>
   )
