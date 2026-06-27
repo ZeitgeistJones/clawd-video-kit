@@ -21,9 +21,19 @@ export type Draft = {
   generatedAt: string
 }
 
+function timeAgo(date: string) {
+  const diff = Date.now() - new Date(date).getTime()
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  if (days > 0) return `${days}d ago`
+  if (hours > 0) return `${hours}h ago`
+  return 'just now'
+}
+
 export default function Home() {
   const [gaps, setGaps] = useState<GapEntry[]>([])
   const [loadingGaps, setLoadingGaps] = useState(false)
+  const [lastScanned, setLastScanned] = useState<string | null>(null)
   const [selectedRepo, setSelectedRepo] = useState<string>('')
   const [generating, setGenerating] = useState(false)
   const [output, setOutput] = useState<{
@@ -39,9 +49,21 @@ export default function Home() {
   useEffect(() => {
     const saved = localStorage.getItem('clawd-kit-drafts')
     if (saved) setDrafts(JSON.parse(saved))
+    loadCache()
   }, [])
 
-  async function runGapAnalysis() {
+  async function loadCache() {
+    try {
+      const res = await fetch('/api/gap-cache')
+      const { cache } = await res.json()
+      if (cache) {
+        setGaps(cache.gaps)
+        setLastScanned(cache.scanned_at)
+      }
+    } catch {}
+  }
+
+  async function runGapAnalysis(force = false) {
     setLoadingGaps(true)
     setError('')
     try {
@@ -60,7 +82,16 @@ export default function Home() {
       })
       const gapsData = await gapsRes.json()
       if (!gapsData.gaps) throw new Error('Gaps error: ' + JSON.stringify(gapsData))
-      setGaps(gapsData.gaps || [])
+
+      setGaps(gapsData.gaps)
+      setLastScanned(new Date().toISOString())
+
+      // save to cache
+      await fetch('/api/gap-cache', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gaps: gapsData.gaps }),
+      })
     } catch (e: any) {
       setError(e.message || 'Gap analysis failed')
     }
@@ -158,14 +189,30 @@ export default function Home() {
         <aside className="sidebar">
           <div className="panel">
             <div className="panel-header">
-              <span>coverage gaps</span>
-              <button onClick={runGapAnalysis} disabled={loadingGaps} className="btn-scan">
-                {loadingGaps ? 'scanning...' : 'scan'}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <span>coverage gaps</span>
+                {lastScanned && (
+                  <span style={{ fontSize: 10, color: 'var(--text-dim)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                    last scanned {timeAgo(lastScanned)}
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {gaps.length > 0 && (
+                  <button onClick={() => runGapAnalysis(true)} disabled={loadingGaps} className="btn-scan" style={{ opacity: 0.6 }}>
+                    {loadingGaps ? '...' : 'rescan'}
+                  </button>
+                )}
+                {gaps.length === 0 && (
+                  <button onClick={() => runGapAnalysis()} disabled={loadingGaps} className="btn-scan">
+                    {loadingGaps ? 'scanning...' : 'scan'}
+                  </button>
+                )}
+              </div>
             </div>
             {gaps.length > 0
               ? <GapReport gaps={gaps} onSelect={setSelectedRepo} selected={selectedRepo} />
-              : <div className="empty">run a scan to find uncovered repos</div>
+              : <div className="empty">{loadingGaps ? 'scanning repos...' : 'run a scan to find uncovered repos'}</div>
             }
           </div>
 
