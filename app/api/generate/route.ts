@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { STYLE_BIBLE, META_RESEARCH_HOOK, SHORT_BRIEF_NOTES } from '@/data/style-bible'
+import { STYLE_BIBLE, META_RESEARCH_HOOK, SHORT_BRIEF_NOTES, THUMBNAIL_CREATIVE_NOTES } from '@/data/style-bible'
 
 const anthropic = new Anthropic()
 
@@ -35,17 +35,21 @@ ${packed}
 Generate TWO outputs:
 
 ---NOTEBOOKLM SHORT BRIEF---
-Write ONE flowing punchy paragraph for NotebookLM to riff on in under 45 seconds. No chapter headers, no labeled sections. Chill bro tone — assume the viewer already knows clawd. Open with a hook, explain what the repo does in one plain-english line, say why clawd holders should care in one line, then close with a short disclaimer (not affiliated, not financial advice, DYOR, verify against primary sources).
+Write ONE flowing punchy paragraph for NotebookLM to riff on in under 45 seconds. No chapter headers, no labeled sections. Follow the attention & authenticity rules — hook in the first sentence, lead with the most scroll-stopping angle, funny and personable not generic. Assume the viewer already knows clawd. Explain what the repo does in one plain-english line, say why clawd holders should care in one line, then close with a short disclaimer (not affiliated, not financial advice, DYOR, verify against primary sources).
 
 ---THUMBNAIL PROMPT---
-A precise, ready-to-paste image generation prompt for ChatGPT or Perplexity. The prompt should:
+A precise, ready-to-paste image generation prompt for ChatGPT or Perplexity.
+
+${THUMBNAIL_CREATIVE_NOTES}
+
+The prompt should:
 - Start by telling the AI that the user will attach an image of the CLAWD mascot (a red crystalline diamond/pyramid-shaped character, sometimes in a tuxedo, sometimes in other outfits — the attached image shows the specific mascot to use)
 - Instruct the AI to incorporate the attached mascot as the central character
-- Describe a specific creative scene, pose, and expression for the mascot that fits the repo topic and feels fun and energetic
+- Describe a specific creative scene, pose, and expression for the mascot that fits the repo topic — funny, energetic, attention-grabbing, not generic
 - Suggest bold title text to overlay (short, punchy, relevant to the short)
 - Describe background, color palette, and visual style — vary the style to fit the vibe (comic book, cinematic, cartoon, anime, pop art, retro, etc)
-- Specify 9:16 vertical YouTube Shorts format, high contrast, eye-catching
-- Keep it under 150 words, be specific
+- Specify 9:16 vertical YouTube Shorts format
+- Keep it under 150 words, be specific — no vague or stock-photo aesthetics
 
 Return both sections clearly separated by the ---NOTEBOOKLM SHORT BRIEF--- and ---THUMBNAIL PROMPT--- headers.`
       : `You are generating a NotebookLM source document, a YouTube description, and a thumbnail prompt for a video about the clawdbotatg GitHub repo: ${repoName} (${repoUrl}).
@@ -60,20 +64,22 @@ ${packed}
 Generate THREE outputs:
 
 ---NOTEBOOKLM DOC---
-A flowing narrative script for NotebookLM — NOT a structured document with labeled sections or chapter headers. Write it as one continuous piece that a chill, hyped narrator would deliver naturally. It should feel like a knowledgeable friend explaining something exciting, not a school presentation.
+A flowing narrative script for NotebookLM — NOT a structured document with labeled sections or chapter headers. Write it as one continuous piece that a chill, hyped, funny, relatable narrator would deliver naturally. It should feel like a knowledgeable friend explaining something exciting, not a school presentation or AI-generated explainer.
+
+Follow the attention & authenticity rules: hook fast, lead with the most attention-grabbing angles, no generic filler or template cadence.
 
 The narrative must naturally weave in these beats (without labeling them):
-- Hook: open with something surprising or punchy about why this repo exists — assume the viewer already knows clawd
+- Hook: open immediately with something surprising or punchy — assume the viewer already knows clawd
 - Why it was built: what gap or problem motivated this?
 - What it does: plain english with good analogies, no jargon walls
 - Why it matters for clawd holders: concrete reason this strengthens the ecosystem or investment thesis
 - The build: acknowledge the speed and quality, don't make humans the bottleneck
 - Close with the full mandatory disclaimer sequence from the production notes
 
-Tone throughout: chill, bro energy. Casual language. Genuinely excited. Never sterile or chapter-by-chapter.
+Tone throughout: chill, bro energy. Casual language. Genuinely excited. Personable and specific — never sterile, never generic AI slop.
 
 ---YOUTUBE DESCRIPTION---
-A YouTube video description in the voice of an enthusiastic clawd community member. Include:
+A YouTube video description in the voice of an enthusiastic, relatable clawd community member — not generic marketing copy. Include:
 - 2-3 sentence summary of what the video covers
 - The GitHub repo URL: ${repoUrl}
 - A note to check official links and contract address
@@ -81,14 +87,18 @@ A YouTube video description in the voice of an enthusiastic clawd community memb
 - Keep it under 500 words
 
 ---THUMBNAIL PROMPT---
-A precise, ready-to-paste image generation prompt for ChatGPT or Perplexity. The prompt should:
+A precise, ready-to-paste image generation prompt for ChatGPT or Perplexity.
+
+${THUMBNAIL_CREATIVE_NOTES}
+
+The prompt should:
 - Start by telling the AI that the user will attach an image of the CLAWD mascot (a red crystalline diamond/pyramid-shaped character, sometimes in a tuxedo, sometimes in other outfits — the attached image shows the specific mascot to use)
 - Instruct the AI to incorporate the attached mascot as the central character
-- Describe a specific creative scene, pose, and expression for the mascot that fits the repo topic and feels fun and energetic
+- Describe a specific creative scene, pose, and expression for the mascot that fits the repo topic — funny, energetic, attention-grabbing, not generic
 - Suggest bold title text to overlay (short, punchy, relevant to the video)
 - Describe background, color palette, and visual style — vary the style to fit the vibe (comic book, cinematic, cartoon, anime, pop art, retro, etc)
-- Specify 16:9 YouTube thumbnail format, high contrast, eye-catching
-- Keep it under 150 words, be specific
+- Specify 16:9 YouTube thumbnail format
+- Keep it under 150 words, be specific — no vague or stock-photo aesthetics
 
 Return all three sections clearly separated by the ---NOTEBOOKLM DOC---, ---YOUTUBE DESCRIPTION---, and ---THUMBNAIL PROMPT--- headers.`
 

@@ -20,6 +20,15 @@ NARRATOR PERSONA
 - Sound genuinely excited, not like an AI reading a report
 - Peer-to-peer energy — talking TO the viewer, not AT them
 - Never sound like a corporate press release or a school textbook
+- Funny, relatable, personable — like a real person who actually gives a damn, not a narrator bot
+
+ATTENTION & AUTHENTICITY
+- Lead with whatever is most surprising, funny, or genuinely interesting about THIS repo — not a generic setup
+- The hook lands fast. No warm-up paragraphs, no throat-clearing, no "today we're going to talk about..."
+- Focus on the most attention-grabbing parts of the repo — don't bury the good stuff, don't pad with filler
+- Avoid generic AI slop: no template rhythm, no hollow enthusiasm, no "let's dive in" / "in today's video" / "game-changer" / "revolutionary" clichés
+- Specificity beats polish — a weird detail, a sharp analogy, or an honest reaction beats smooth corporate copy every time
+- Write like someone in the clawd community talking to a friend who scrolled past 50 other videos today — earn their attention early
 
 REQUIRED NARRATIVE BEATS (weave these in naturally, not as labeled sections)
 - WHY WAS THIS BUILT: what problem or gap does this repo solve? what was the motivation?
@@ -54,6 +63,16 @@ FORBIDDEN
 - No "In this video we will cover..." type intros
 - No corporate or sterile language
 - Don't over-explain things the audience already knows
+- No generic AI filler — if a sentence could appear in any crypto video about any project, cut it or make it specific to this repo
+`.trim()
+
+export const THUMBNAIL_CREATIVE_NOTES = `
+THUMBNAIL & VISUAL CREATIVE NOTES
+- Visuals must stop the scroll — bold, specific, attention-grabbing, not safe or generic
+- Avoid generic AI image slop: no vague "futuristic background", no stock-photo energy, no bland corporate aesthetics
+- The scene should feel intentional, funny, or surprising — something a real creator would actually thumbnail, not a template
+- Mascot should be doing something specific and expressive — a pose, reaction, or situation tied to the repo topic
+- High contrast, clear focal point, strong color choices that pop at small sizes
 `.trim()
 
 export const META_RESEARCH_HOOK = `
@@ -70,15 +89,17 @@ FORMAT & DURATION
 - Target duration: 30-45 seconds of spoken audio
 - ONE flowing punchy paragraph — no chapter headers, no labeled sections
 - NotebookLM hosts will riff on this in under 45 seconds
+- This is a Short — every word fights for its life. Only the spiciest, most scroll-stopping beats make the cut
 
 REQUIRED BEATS (weave in naturally, unlabeled)
-- Hook: open punchy — assume the viewer already knows clawd
+- Hook: land in the first sentence — assume the viewer already knows clawd, no preamble
 - What it does: one plain-english line on what the repo does
 - Why clawd holders should care: one concrete line on ecosystem or investment thesis value
 - Short disclaimer: condensed closing — not affiliated, not financial advice, DYOR, verify against primary sources
 
 TONE
-- Same chill bro energy as the full doc — casual, hyped, peer-to-peer
-- Never sterile or corporate
+- Same chill bro energy as the full doc — casual, hyped, peer-to-peer, funny and relatable
+- Never sterile, corporate, or generic AI slop
 - Do NOT over-explain clawd or the ecosystem
+- Lead with the most attention-grabbing angle — if you only had 10 seconds, what would you say first?
 `.trim()
