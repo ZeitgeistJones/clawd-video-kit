@@ -90,16 +90,29 @@ FORMAT & DURATION
 - ONE flowing punchy paragraph — no chapter headers, no labeled sections
 - NotebookLM hosts will riff on this in under 45 seconds
 - This is a Short — every word fights for its life. Only the spiciest, most scroll-stopping beats make the cut
+- NO disclaimer in the output — skip all legal/financial/DYOR closing language entirely
+
+AUDIENCE
+- Assume viewers are normies who do NOT know clawd, the token, or the ecosystem
+- There is not enough time to explain what clawd is — do NOT try
+- You may briefly reference "an AI agent named clawdbotatg" as the builder/context, one natural phrase max — enough to orient a stranger, not a lecture
+- Write so anyone scrolling YouTube Shorts can follow along — plain english, zero jargon, zero insider assumptions
+
+GOAL
+- Make normies understand why this repo is wild and worth paying attention to
+- Hype them up — funny, relatable, personable narrator energy
+- Leave them curious enough to click the channel and watch longer videos to learn more about clawdbotatg
+- This is a teaser, not a deep dive
 
 REQUIRED BEATS (weave in naturally, unlabeled)
-- Hook: land in the first sentence — assume the viewer already knows clawd, no preamble
-- What it does: one plain-english line on what the repo does
-- Why clawd holders should care: one concrete line on ecosystem or investment thesis value
-- Short disclaimer: condensed closing — not affiliated, not financial advice, DYOR, verify against primary sources
+- Hook: land in the first sentence — immediate, surprising, scroll-stopping
+- What it does: one plain-english line anyone can understand
+- Why it matters: one line on why this is actually interesting or impressive — framed for outsiders, not holders
 
-TONE
-- Same chill bro energy as the full doc — casual, hyped, peer-to-peer, funny and relatable
-- Never sterile, corporate, or generic AI slop
-- Do NOT over-explain clawd or the ecosystem
-- Lead with the most attention-grabbing angle — if you only had 10 seconds, what would you say first?
+NARRATOR & ATTENTION
+- Chill, funny, relatable — like a friend who just found something insane and had to tell you
+- Hook fast, lead with the most attention-grabbing angle — if you only had 10 seconds, what would you say first?
+- Avoid generic AI slop: no template rhythm, no hollow enthusiasm, no "let's dive in" / "game-changer" clichés
+- Specificity beats polish — a weird detail, sharp analogy, or honest reaction beats smooth corporate copy
+- Never sterile, corporate, or insider-coded
 `.trim()

@@ -25,8 +25,6 @@ export async function POST(req: Request) {
 
 IMPORTANT: The project is called "clawd" (rhymes with "clawed"). Never spell it "claude". Never confuse it with Anthropic's Claude AI.
 
-${STYLE_BIBLE}
-
 ${SHORT_BRIEF_NOTES}${metaSection}${previousContext}${extraSection}
 
 Here is the packed repo content:
@@ -35,7 +33,7 @@ ${packed}
 Generate TWO outputs:
 
 ---NOTEBOOKLM SHORT BRIEF---
-Write ONE flowing punchy paragraph for NotebookLM to riff on in under 45 seconds. No chapter headers, no labeled sections. Follow the attention & authenticity rules — hook in the first sentence, lead with the most scroll-stopping angle, funny and personable not generic. Assume the viewer already knows clawd. Explain what the repo does in one plain-english line, say why clawd holders should care in one line, then close with a short disclaimer (not affiliated, not financial advice, DYOR, verify against primary sources).
+Write ONE flowing punchy paragraph for NotebookLM to riff on in under 45 seconds. No chapter headers, no labeled sections, no disclaimer. Audience is normies who don't know clawd — write plain english anyone can follow. You may briefly mention "an AI agent named clawdbotatg" but don't explain the ecosystem. Hook in the first sentence, explain what the repo does in one understandable line, say why it's wild or impressive in one line, and close with energy that makes viewers want to click the channel to learn more. Funny, relatable, hype — not generic AI slop.
 
 ---THUMBNAIL PROMPT---
 A precise, ready-to-paste image generation prompt for ChatGPT or Perplexity.
