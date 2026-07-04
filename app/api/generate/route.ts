@@ -33,7 +33,9 @@ ${packed}
 Generate TWO outputs:
 
 ---NOTEBOOKLM SHORT BRIEF---
-Write ONE flowing punchy paragraph for NotebookLM to riff on in under 45 seconds. No chapter headers, no labeled sections, no disclaimer. Audience is normies who don't know clawd — write plain english anyone can follow. You may briefly mention "an AI agent named clawdbotatg" but don't explain the ecosystem. Hook in the first sentence, explain what the repo does in one understandable line, say why it's wild or impressive in one line, and close with energy that makes viewers want to click the channel to learn more. Funny, relatable, hype — not generic AI slop.
+Write ONE flowing punchy paragraph for NotebookLM to riff on in under 45 seconds. No chapter headers, no labeled sections, no disclaimer. Audience is normies who don't know clawd — write plain english anyone can follow. You may briefly mention "an AI agent named clawdbotatg" but don't explain the ecosystem. Hook in the first sentence, explain what the repo does in one understandable line, say why it's wild or impressive in one line, and close with energy that makes viewers want to click the channel to learn more.
+
+Voice is critical: sound like a 20-something dude telling his friends about something insane — use "bro", "dude", "bruh", "yo", "ngl" naturally throughout. Funny, amused, relatable, a little unpolished. Make people smirk. NOT a presenter, NOT generic AI hype.
 
 ---THUMBNAIL PROMPT---
 A precise, ready-to-paste image generation prompt for ChatGPT or Perplexity.
