@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { NOTEBOOKLM_SHORT_FOCUS, NOTEBOOKLM_FULL_FOCUS } from '@/data/style-bible'
 
 type Props = {
   isShort?: boolean
@@ -111,6 +112,12 @@ export default function OutputPanel({ isShort, shortBrief, notebookDoc, youtubeD
           {youtubeDesc && <CopyBlock label="youtube description" content={youtubeDesc} />}
         </>
       )}
+
+      <CopyBlock
+        label="notebooklm custom focus"
+        content={isShort ? NOTEBOOKLM_SHORT_FOCUS : NOTEBOOKLM_FULL_FOCUS}
+        note="paste into NotebookLM's custom topic box when generating audio"
+      />
 
       {thumbnailPrompt && (
         <CopyBlock

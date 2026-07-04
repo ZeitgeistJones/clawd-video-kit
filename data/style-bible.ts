@@ -116,3 +116,31 @@ NARRATOR & ATTENTION
 - Specificity beats polish — a weird detail, sharp analogy, or honest reaction beats smooth corporate copy
 - Never sterile, corporate, or insider-coded
 `.trim()
+
+export const NOTEBOOKLM_SHORT_FOCUS = `This is a YouTube Short teaser, not a full episode. Keep the audio overview under 45 seconds.
+
+Audience: normies — plain English only, no jargon.
+
+Structure:
+- Hook in the first 3 seconds
+- One line on what this repo/tool does
+- One line on why it's wild or impressive
+- End with curiosity — make viewers want to check the channel for the full story
+
+Tone: funny, relatable, hype — like a friend who found something insane. Not corporate, not lecture-y.
+
+Optional: if NotebookLM suggests focus buttons, "Bot engineering" is usually the best fit. You can skip all of them.`
+
+export const NOTEBOOKLM_FULL_FOCUS = `This is a full YouTube video overview, roughly 5-6 minutes of spoken audio.
+
+Audience: clawd community members who already know what clawd is, who Austin is, and the basics of the ecosystem. Do NOT over-explain the ecosystem — get straight to what's interesting about this specific repo.
+
+Tone: chill, bro, funny — like a hyped community member explaining something sick to a friend. Casual, genuinely excited, never corporate or sterile.
+
+Structure: one flowing narrative — hook fast, why it was built, what it does, why it matters for clawd holders, acknowledge the build. No chapter headers or "in this video we will cover" intros.
+
+Always end with the full disclaimer sequence: not officially affiliated, not financial advice, DYOR, verify against primary sources, check description for official links and contract address.
+
+Avoid generic AI slop — be specific to this repo, not template crypto copy.
+
+Optional: if NotebookLM suggests focus buttons, pick whichever fits the repo topic best, or skip all of them.`
