@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import SiteHeader from '@/components/SiteHeader'
 
 export const metadata: Metadata = {
   title: 'clawd video kit',
@@ -9,7 +10,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <main className="main">
+          <SiteHeader />
+          {children}
+        </main>
+      </body>
     </html>
   )
 }

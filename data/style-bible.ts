@@ -153,3 +153,45 @@ Always end with the full disclaimer sequence: not officially affiliated, not fin
 Avoid generic AI slop — be specific to this repo, not template crypto copy.
 
 Optional: if NotebookLM suggests focus buttons, pick whichever fits the repo topic best, or skip all of them.`
+
+export const MEDIUM_BRIEF_NOTES = `
+== MEDIUM BRIEF PRODUCTION NOTES ==
+
+FORMAT & DURATION
+- Target duration: 2-3 minutes of spoken audio
+- Condensed but COMPLETE — hit all narrative beats, not a teaser like a Short
+- ONE flowing narrative — no chapter headers, no labeled sections
+- Tighter pacing than full video — keep it moving, cut filler, but don't skip the arc
+
+AUDIENCE
+- Same as full video: viewer already knows clawd and the ecosystem
+- Do NOT over-explain the ecosystem — get straight to what's interesting about THIS repo
+
+REQUIRED BEATS (weave in naturally, unlabeled)
+- Hook, why it was built, what it does, why it matters for clawd holders, the build itself
+- Close with the full mandatory disclaimer sequence from the production notes
+
+TONE
+- Same chill bro energy as full video — casual, hyped, personable, never sterile
+- Condensed, not shallow — every beat present, just less room to linger
+`.trim()
+
+export const HEYGEN_NOTES = `
+== HEYGEN / TELEPROMPTER DELIVERY ==
+- Single presenter talking directly to camera — NOT a two-host podcast or conversational back-and-forth
+- Write for a talking head reading a teleprompter: direct address ("you"), shorter sentences, clear line breaks in the flow
+- Less riffing and banter, more read-aloud script cadence — still chill and personable, just deliverable in one take
+- Same facts and tone rules apply — no generic AI slop, just a different delivery format
+`.trim()
+
+export const NOTEBOOKLM_MEDIUM_FOCUS = `This is a medium-length YouTube video overview, roughly 2-3 minutes of spoken audio.
+
+Audience: clawd community members who already know the ecosystem. Do NOT over-explain — get straight to what's interesting about this repo.
+
+Structure: one flowing narrative — hook fast, why it was built, what it does, why it matters for clawd holders, acknowledge the build. No chapter headers. Condensed but complete.
+
+Always end with the full disclaimer sequence: not officially affiliated, not financial advice, DYOR, verify against primary sources.
+
+Tone: chill, personable, genuinely excited. Credit builds to clawdbotatg, not Austin.
+
+Optional: if NotebookLM suggests focus buttons, pick whichever fits the repo topic best, or skip all of them.`

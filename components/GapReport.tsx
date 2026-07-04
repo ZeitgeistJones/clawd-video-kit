@@ -20,9 +20,10 @@ type Props = {
   gaps: GapEntry[]
   onSelect: (repo: string) => void
   selected: string
+  cachedRepos: string[]
 }
 
-export default function GapReport({ gaps, onSelect, selected }: Props) {
+export default function GapReport({ gaps, onSelect, selected, cachedRepos }: Props) {
   const sorted = [...gaps].sort((a, b) => {
     if (a.status === 'covered' && b.status !== 'covered') return 1
     if (b.status === 'covered' && a.status !== 'covered') return -1
@@ -51,16 +52,30 @@ export default function GapReport({ gaps, onSelect, selected }: Props) {
             <span style={{ fontSize: 12, color: 'var(--text)', fontWeight: selected === g.repoName ? 600 : 400 }}>
               {g.repoName}
             </span>
-            <span style={{
-              fontSize: 10,
-              color: STATUS_COLOR[g.status],
-              background: `${STATUS_COLOR[g.status]}22`,
-              padding: '1px 6px',
-              borderRadius: 4,
-              border: `1px solid ${STATUS_COLOR[g.status]}44`,
-            }}>
-              {STATUS_LABEL[g.status]}
-            </span>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              {cachedRepos.includes(g.repoName) && (
+                <span style={{
+                  fontSize: 10,
+                  color: 'var(--text-dim)',
+                  background: 'var(--surface-2)',
+                  padding: '1px 6px',
+                  borderRadius: 4,
+                  border: '1px solid var(--border-strong)',
+                }}>
+                  cached
+                </span>
+              )}
+              <span style={{
+                fontSize: 10,
+                color: STATUS_COLOR[g.status],
+                background: `${STATUS_COLOR[g.status]}22`,
+                padding: '1px 6px',
+                borderRadius: 4,
+                border: `1px solid ${STATUS_COLOR[g.status]}44`,
+              }}>
+                {STATUS_LABEL[g.status]}
+              </span>
+            </div>
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>
             pushed {new Date(g.repoLastPushed).toLocaleDateString()}

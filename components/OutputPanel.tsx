@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { NOTEBOOKLM_SHORT_FOCUS, NOTEBOOKLM_FULL_FOCUS } from '@/data/style-bible'
+import { NOTEBOOKLM_SHORT_FOCUS, NOTEBOOKLM_FULL_FOCUS, NOTEBOOKLM_MEDIUM_FOCUS } from '@/data/style-bible'
+import type { Duration } from '@/types/generate'
 
 type Props = {
-  isShort?: boolean
+  duration?: Duration
+  isHeyGen?: boolean
   shortBrief?: string
   notebookDoc?: string
   youtubeDesc?: string
@@ -79,7 +81,31 @@ function CopyBlock({ label, content, note }: { label: string; content: string; n
   )
 }
 
-export default function OutputPanel({ isShort, shortBrief, notebookDoc, youtubeDesc, thumbnailPrompt, pfpImage, pfpPrompt, repoName, onMarkCovered }: Props) {
+function notebookFocusForDuration(duration?: Duration) {
+  if (duration === 'short') return NOTEBOOKLM_SHORT_FOCUS
+  if (duration === 'medium') return NOTEBOOKLM_MEDIUM_FOCUS
+  return NOTEBOOKLM_FULL_FOCUS
+}
+
+function docNote(duration?: Duration, isHeyGen?: boolean) {
+  const parts: string[] = []
+  if (duration === 'medium') parts.push('targets 2–3 minutes')
+  if (isHeyGen) parts.push('formatted for HeyGen — single presenter, teleprompter style')
+  return parts.length > 0 ? parts.join(' · ') : undefined
+}
+
+export default function OutputPanel({
+  duration,
+  isHeyGen,
+  shortBrief,
+  notebookDoc,
+  youtubeDesc,
+  thumbnailPrompt,
+  pfpImage,
+  pfpPrompt,
+  repoName,
+  onMarkCovered,
+}: Props) {
   const [videoUrl, setVideoUrl] = useState('')
   const [marked, setMarked] = useState(false)
 
@@ -98,7 +124,7 @@ export default function OutputPanel({ isShort, shortBrief, notebookDoc, youtubeD
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {isShort ? (
+      {duration === 'short' ? (
         shortBrief && (
           <CopyBlock
             label="notebooklm short brief"
@@ -108,14 +134,20 @@ export default function OutputPanel({ isShort, shortBrief, notebookDoc, youtubeD
         )
       ) : (
         <>
-          {notebookDoc && <CopyBlock label="notebooklm source doc" content={notebookDoc} />}
+          {notebookDoc && (
+            <CopyBlock
+              label="notebooklm source doc"
+              content={notebookDoc}
+              note={docNote(duration, isHeyGen)}
+            />
+          )}
           {youtubeDesc && <CopyBlock label="youtube description" content={youtubeDesc} />}
         </>
       )}
 
       <CopyBlock
         label="notebooklm custom focus"
-        content={isShort ? NOTEBOOKLM_SHORT_FOCUS : NOTEBOOKLM_FULL_FOCUS}
+        content={notebookFocusForDuration(duration)}
         note="paste into NotebookLM's custom topic box when generating audio"
       />
 
@@ -123,7 +155,7 @@ export default function OutputPanel({ isShort, shortBrief, notebookDoc, youtubeD
         <CopyBlock
           label="thumbnail prompt"
           content={thumbnailPrompt}
-          note={isShort
+          note={duration === 'short'
             ? '9:16 vertical — paste into ChatGPT or Perplexity with the mascot image attached'
             : 'paste into ChatGPT or Perplexity with the mascot image attached'}
         />

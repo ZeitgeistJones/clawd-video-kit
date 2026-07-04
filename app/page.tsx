@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import GapReport from '@/components/GapReport'
 import GeneratePanel from '@/components/GeneratePanel'
 import OutputPanel from '@/components/OutputPanel'
 import DraftHistory from '@/components/DraftHistory'
+import type { Duration, GenerationOutputs } from '@/types/generate'
 
 export type GapEntry = {
   repoName: string
@@ -21,6 +22,11 @@ export type Draft = {
   generatedAt: string
 }
 
+type OutputState = GenerationOutputs & {
+  pfpImage?: string
+  pfpPrompt?: string
+}
+
 function timeAgo(date: string) {
   const diff = Date.now() - new Date(date).getTime()
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
@@ -35,24 +41,50 @@ export default function Home() {
   const [loadingGaps, setLoadingGaps] = useState(false)
   const [lastScanned, setLastScanned] = useState<string | null>(null)
   const [selectedRepo, setSelectedRepo] = useState<string>('')
+  const [duration, setDuration] = useState<Duration>('full')
+  const [isHeyGen, setIsHeyGen] = useState(false)
   const [generating, setGenerating] = useState(false)
-  const [output, setOutput] = useState<{
-    isShort?: boolean
-    shortBrief?: string
-    notebookDoc?: string
-    youtubeDesc?: string
-    thumbnailPrompt?: string
-    pfpImage?: string
-    pfpPrompt?: string
-  } | null>(null)
+  const [output, setOutput] = useState<OutputState | null>(null)
+  const [cachedRepos, setCachedRepos] = useState<string[]>([])
   const [drafts, setDrafts] = useState<Draft[]>([])
   const [error, setError] = useState('')
+
+  async function loadGenerationCacheList() {
+    try {
+      const res = await fetch('/api/generation-cache')
+      const { repos } = await res.json()
+      if (repos) setCachedRepos(repos.map((r: { repoName: string }) => r.repoName))
+    } catch {}
+  }
+
+  const loadRepoCache = useCallback(async (repoName: string) => {
+    if (!repoName.trim()) {
+      setOutput(null)
+      return
+    }
+    try {
+      const res = await fetch(`/api/generation-cache?repoName=${encodeURIComponent(repoName)}`)
+      const { cache } = await res.json()
+      if (cache) {
+        setOutput(cache)
+        setDuration(cache.duration || 'full')
+        setIsHeyGen(cache.isHeyGen || false)
+      } else {
+        setOutput(null)
+      }
+    } catch {}
+  }, [])
 
   useEffect(() => {
     const saved = localStorage.getItem('clawd-kit-drafts')
     if (saved) setDrafts(JSON.parse(saved))
     loadCache()
+    loadGenerationCacheList()
   }, [])
+
+  useEffect(() => {
+    if (selectedRepo.trim()) loadRepoCache(selectedRepo.trim())
+  }, [selectedRepo, loadRepoCache])
 
   async function loadCache() {
     try {
@@ -62,6 +94,17 @@ export default function Home() {
         setGaps(cache.gaps)
         setLastScanned(cache.scanned_at)
       }
+    } catch {}
+  }
+
+  async function saveGenerationCache(repoName: string, data: GenerationOutputs) {
+    try {
+      await fetch('/api/generation-cache', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repoName, outputs: data }),
+      })
+      await loadGenerationCacheList()
     } catch {}
   }
 
@@ -88,7 +131,6 @@ export default function Home() {
       setGaps(gapsData.gaps)
       setLastScanned(new Date().toISOString())
 
-      // save to cache
       await fetch('/api/gap-cache', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -106,11 +148,14 @@ export default function Home() {
     previousVideoDescription: string
     generatePfp: boolean
     extraContext: string
-    isShort: boolean
+    duration: Duration
+    isHeyGen: boolean
+    forceRegenerate?: boolean
   }) {
     setGenerating(true)
     setError('')
-    setOutput(null)
+    if (opts.forceRegenerate) setOutput(null)
+
     try {
       const packRes = await fetch('/api/pack', {
         method: 'POST',
@@ -130,13 +175,15 @@ export default function Home() {
           includeMetaHook: opts.includeMetaHook,
           previousVideoDescription: opts.previousVideoDescription,
           extraContext: opts.extraContext,
-          isShort: opts.isShort,
+          duration: opts.duration,
+          isHeyGen: opts.isHeyGen,
         }),
       })
       const genData = await genRes.json()
       if (genData.error) throw new Error(genData.error)
 
       const { shortBrief, notebookDoc, youtubeDesc, thumbnailPrompt } = genData
+      const generatedAt = new Date().toISOString()
 
       let pfpImage: string | undefined
       let pfpPrompt: string | undefined
@@ -147,7 +194,7 @@ export default function Home() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             repoName: opts.repoName,
-            notebookDoc: opts.isShort ? shortBrief : notebookDoc,
+            notebookDoc: opts.duration === 'short' ? shortBrief : notebookDoc,
           }),
         })
         const pfpData = await pfpRes.json()
@@ -159,16 +206,25 @@ export default function Home() {
         }
       }
 
-      if (opts.isShort) {
-        setOutput({ isShort: true, shortBrief, thumbnailPrompt, pfpImage, pfpPrompt })
-      } else {
-        setOutput({ isShort: false, notebookDoc, youtubeDesc, thumbnailPrompt, pfpImage, pfpPrompt })
+      const cachePayload: GenerationOutputs = {
+        duration: opts.duration,
+        isHeyGen: opts.isHeyGen,
+        generatedAt,
+        ...(opts.duration === 'short'
+          ? { shortBrief, thumbnailPrompt }
+          : { notebookDoc, youtubeDesc, thumbnailPrompt }),
+      }
 
+      const newOutput: OutputState = { ...cachePayload, pfpImage, pfpPrompt }
+      setOutput(newOutput)
+      await saveGenerationCache(opts.repoName, cachePayload)
+
+      if (opts.duration !== 'short' && notebookDoc && youtubeDesc) {
         const draft: Draft = {
           repoName: opts.repoName,
           notebookDoc,
           youtubeDesc,
-          generatedAt: new Date().toISOString(),
+          generatedAt,
         }
         const updated = [draft, ...drafts].slice(0, 5)
         setDrafts(updated)
@@ -189,77 +245,80 @@ export default function Home() {
     setGaps(prev => prev.map(g => g.repoName === repoName ? { ...g, status: 'covered' } : g))
   }
 
+  function handleRepoSelect(repo: string) {
+    setSelectedRepo(repo)
+  }
+
   return (
-    <main className="main">
-      <header className="header">
-        <div className="header-inner">
-          <span className="logo">🦞 clawd video kit</span>
-          <span className="tagline">gap analysis → notebooklm doc → youtube description</span>
-        </div>
-      </header>
-
-      <div className="layout">
-        <aside className="sidebar">
-          <div className="panel">
-            <div className="panel-header">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span>coverage gaps</span>
-                {lastScanned && (
-                  <span style={{ fontSize: 10, color: 'var(--text-dim)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
-                    last scanned {timeAgo(lastScanned)}
-                  </span>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                {gaps.length > 0 && (
-                  <button onClick={() => runGapAnalysis(true)} disabled={loadingGaps} className="btn-scan" style={{ opacity: 0.6 }}>
-                    {loadingGaps ? '...' : 'rescan'}
-                  </button>
-                )}
-                {gaps.length === 0 && (
-                  <button onClick={() => runGapAnalysis()} disabled={loadingGaps} className="btn-scan">
-                    {loadingGaps ? 'scanning...' : 'scan'}
-                  </button>
-                )}
-              </div>
+    <div className="layout">
+      <aside className="sidebar">
+        <div className="panel">
+          <div className="panel-header">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span>coverage gaps</span>
+              {lastScanned && (
+                <span style={{ fontSize: 10, color: 'var(--text-dim)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                  last scanned {timeAgo(lastScanned)}
+                </span>
+              )}
             </div>
-            {gaps.length > 0
-              ? <GapReport gaps={gaps} onSelect={setSelectedRepo} selected={selectedRepo} />
-              : <div className="empty">{loadingGaps ? 'scanning repos...' : 'run a scan to find uncovered repos'}</div>
-            }
+            <div style={{ display: 'flex', gap: 6 }}>
+              {gaps.length > 0 && (
+                <button onClick={() => runGapAnalysis(true)} disabled={loadingGaps} className="btn-scan" style={{ opacity: 0.6 }}>
+                  {loadingGaps ? '...' : 'rescan'}
+                </button>
+              )}
+              {gaps.length === 0 && (
+                <button onClick={() => runGapAnalysis()} disabled={loadingGaps} className="btn-scan">
+                  {loadingGaps ? 'scanning...' : 'scan'}
+                </button>
+              )}
+            </div>
           </div>
-
-          <DraftHistory drafts={drafts} onLoad={(d) => {
-            setSelectedRepo(d.repoName)
-            setOutput({ isShort: false, notebookDoc: d.notebookDoc, youtubeDesc: d.youtubeDesc })
-          }} />
-        </aside>
-
-        <div className="content">
-          {error && <div className="error">{error}</div>}
-
-          <GeneratePanel
-            selectedRepo={selectedRepo}
-            onRepoChange={setSelectedRepo}
-            onGenerate={generate}
-            generating={generating}
-          />
-
-          {output && (
-            <OutputPanel
-              isShort={output.isShort}
-              shortBrief={output.shortBrief}
-              notebookDoc={output.notebookDoc}
-              youtubeDesc={output.youtubeDesc}
-              thumbnailPrompt={output.thumbnailPrompt}
-              pfpImage={output.pfpImage}
-              pfpPrompt={output.pfpPrompt}
-              repoName={selectedRepo}
-              onMarkCovered={markCovered}
-            />
-          )}
+          {gaps.length > 0
+            ? <GapReport gaps={gaps} onSelect={handleRepoSelect} selected={selectedRepo} cachedRepos={cachedRepos} />
+            : <div className="empty">{loadingGaps ? 'scanning repos...' : 'run a scan to find uncovered repos'}</div>
+          }
         </div>
+
+        <DraftHistory drafts={drafts} onLoad={(d) => {
+          setSelectedRepo(d.repoName)
+          setDuration('full')
+          setIsHeyGen(false)
+          setOutput({ duration: 'full', isHeyGen: false, notebookDoc: d.notebookDoc, youtubeDesc: d.youtubeDesc, generatedAt: d.generatedAt })
+        }} />
+      </aside>
+
+      <div className="content">
+        {error && <div className="error">{error}</div>}
+
+        <GeneratePanel
+          selectedRepo={selectedRepo}
+          onRepoChange={setSelectedRepo}
+          duration={duration}
+          onDurationChange={setDuration}
+          isHeyGen={isHeyGen}
+          onHeyGenChange={setIsHeyGen}
+          onGenerate={generate}
+          generating={generating}
+          hasOutput={!!output}
+        />
+
+        {output && (
+          <OutputPanel
+            duration={output.duration}
+            isHeyGen={output.isHeyGen}
+            shortBrief={output.shortBrief}
+            notebookDoc={output.notebookDoc}
+            youtubeDesc={output.youtubeDesc}
+            thumbnailPrompt={output.thumbnailPrompt}
+            pfpImage={output.pfpImage}
+            pfpPrompt={output.pfpPrompt}
+            repoName={selectedRepo}
+            onMarkCovered={markCovered}
+          />
+        )}
       </div>
-    </main>
+    </div>
   )
 }
