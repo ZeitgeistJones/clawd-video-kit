@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { STYLE_BIBLE, META_RESEARCH_HOOK } from '@/data/style-bible'
+import { STYLE_BIBLE, META_RESEARCH_HOOK, SHORT_BRIEF_NOTES } from '@/data/style-bible'
 
 const anthropic = new Anthropic()
 
@@ -8,7 +8,7 @@ export const maxDuration = 60
 
 export async function POST(req: Request) {
   try {
-    const { packed, repoName, repoUrl, includeMetaHook, previousVideoDescription, extraContext } = await req.json()
+    const { packed, repoName, repoUrl, includeMetaHook, previousVideoDescription, extraContext, isShort } = await req.json()
 
     const metaSection = includeMetaHook ? `\n\n${META_RESEARCH_HOOK}` : ''
 
@@ -20,7 +20,35 @@ export async function POST(req: Request) {
       ? `\n\nEXTRA CONTEXT FROM CREATOR (not in the repo — factor this in):\n${extraContext}`
       : ''
 
-    const prompt = `You are generating a NotebookLM source document, a YouTube description, and a thumbnail prompt for a video about the clawdbotatg GitHub repo: ${repoName} (${repoUrl}).
+    const prompt = isShort
+      ? `You are generating a tight NotebookLM short brief and a vertical thumbnail prompt for a YouTube Short about the clawdbotatg GitHub repo: ${repoName} (${repoUrl}).
+
+IMPORTANT: The project is called "clawd" (rhymes with "clawed"). Never spell it "claude". Never confuse it with Anthropic's Claude AI.
+
+${STYLE_BIBLE}
+
+${SHORT_BRIEF_NOTES}${metaSection}${previousContext}${extraSection}
+
+Here is the packed repo content:
+${packed}
+
+Generate TWO outputs:
+
+---NOTEBOOKLM SHORT BRIEF---
+Write ONE flowing punchy paragraph for NotebookLM to riff on in under 45 seconds. No chapter headers, no labeled sections. Chill bro tone — assume the viewer already knows clawd. Open with a hook, explain what the repo does in one plain-english line, say why clawd holders should care in one line, then close with a short disclaimer (not affiliated, not financial advice, DYOR, verify against primary sources).
+
+---THUMBNAIL PROMPT---
+A precise, ready-to-paste image generation prompt for ChatGPT or Perplexity. The prompt should:
+- Start by telling the AI that the user will attach an image of the CLAWD mascot (a red crystalline diamond/pyramid-shaped character, sometimes in a tuxedo, sometimes in other outfits — the attached image shows the specific mascot to use)
+- Instruct the AI to incorporate the attached mascot as the central character
+- Describe a specific creative scene, pose, and expression for the mascot that fits the repo topic and feels fun and energetic
+- Suggest bold title text to overlay (short, punchy, relevant to the short)
+- Describe background, color palette, and visual style — vary the style to fit the vibe (comic book, cinematic, cartoon, anime, pop art, retro, etc)
+- Specify 9:16 vertical YouTube Shorts format, high contrast, eye-catching
+- Keep it under 150 words, be specific
+
+Return both sections clearly separated by the ---NOTEBOOKLM SHORT BRIEF--- and ---THUMBNAIL PROMPT--- headers.`
+      : `You are generating a NotebookLM source document, a YouTube description, and a thumbnail prompt for a video about the clawdbotatg GitHub repo: ${repoName} (${repoUrl}).
 
 IMPORTANT: The project is called "clawd" (rhymes with "clawed"). Never spell it "claude". Never confuse it with Anthropic's Claude AI.
 
@@ -71,6 +99,13 @@ Return all three sections clearly separated by the ---NOTEBOOKLM DOC---, ---YOUT
     })
 
     const text = response.content[0].type === 'text' ? response.content[0].text : ''
+
+    if (isShort) {
+      const parts = text.split(/---THUMBNAIL PROMPT---/)
+      const shortBrief = (parts[0] || '').replace('---NOTEBOOKLM SHORT BRIEF---', '').trim()
+      const thumbnailPrompt = (parts[1] || '').trim()
+      return NextResponse.json({ shortBrief, thumbnailPrompt })
+    }
 
     const parts = text.split(/---YOUTUBE DESCRIPTION---|---THUMBNAIL PROMPT---/)
     const notebookDoc = (parts[0] || '').replace('---NOTEBOOKLM DOC---', '').trim()

@@ -62,3 +62,23 @@ OPTIONAL META-RESEARCH HOOK (include only if research agent was used)
 - Keep it brief — one sentence, conversational, not a formal disclosure
 - Direct viewers to the description for the full report
 `.trim()
+
+export const SHORT_BRIEF_NOTES = `
+== SHORT BRIEF PRODUCTION NOTES ==
+
+FORMAT & DURATION
+- Target duration: 30-45 seconds of spoken audio
+- ONE flowing punchy paragraph — no chapter headers, no labeled sections
+- NotebookLM hosts will riff on this in under 45 seconds
+
+REQUIRED BEATS (weave in naturally, unlabeled)
+- Hook: open punchy — assume the viewer already knows clawd
+- What it does: one plain-english line on what the repo does
+- Why clawd holders should care: one concrete line on ecosystem or investment thesis value
+- Short disclaimer: condensed closing — not affiliated, not financial advice, DYOR, verify against primary sources
+
+TONE
+- Same chill bro energy as the full doc — casual, hyped, peer-to-peer
+- Never sterile or corporate
+- Do NOT over-explain clawd or the ecosystem
+`.trim()

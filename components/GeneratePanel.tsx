@@ -11,6 +11,7 @@ type Props = {
     previousVideoDescription: string
     generatePfp: boolean
     extraContext: string
+    isShort: boolean
   }) => void
   generating: boolean
 }
@@ -21,6 +22,7 @@ export default function GeneratePanel({ selectedRepo, onRepoChange, onGenerate, 
   const [showPrevious, setShowPrevious] = useState(false)
   const [generatePfp, setGeneratePfp] = useState(false)
   const [extraContext, setExtraContext] = useState('')
+  const [isShort, setIsShort] = useState(false)
 
   function handleGenerate() {
     if (!selectedRepo.trim()) return
@@ -30,6 +32,7 @@ export default function GeneratePanel({ selectedRepo, onRepoChange, onGenerate, 
       previousVideoDescription,
       generatePfp,
       extraContext,
+      isShort,
     })
   }
 
@@ -91,6 +94,18 @@ export default function GeneratePanel({ selectedRepo, onRepoChange, onGenerate, 
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={isShort}
+            onChange={e => setIsShort(e.target.checked)}
+            style={{ accentColor: 'var(--accent)', width: 14, height: 14 }}
+          />
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            generate as short <span style={{ color: 'var(--text-dim)' }}>(30–45s YouTube Short)</span>
+          </span>
+        </label>
+
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
           <input
             type="checkbox"
@@ -168,7 +183,7 @@ export default function GeneratePanel({ selectedRepo, onRepoChange, onGenerate, 
           opacity: !selectedRepo.trim() ? 0.4 : 1,
         }}
       >
-        {generating ? 'generating...' : '⚡ generate doc + description'}
+        {generating ? 'generating...' : isShort ? '⚡ generate short brief' : '⚡ generate doc + description'}
       </button>
     </div>
   )

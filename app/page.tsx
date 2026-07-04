@@ -37,8 +37,10 @@ export default function Home() {
   const [selectedRepo, setSelectedRepo] = useState<string>('')
   const [generating, setGenerating] = useState(false)
   const [output, setOutput] = useState<{
-    notebookDoc: string
-    youtubeDesc: string
+    isShort?: boolean
+    shortBrief?: string
+    notebookDoc?: string
+    youtubeDesc?: string
     thumbnailPrompt?: string
     pfpImage?: string
     pfpPrompt?: string
@@ -104,6 +106,7 @@ export default function Home() {
     previousVideoDescription: string
     generatePfp: boolean
     extraContext: string
+    isShort: boolean
   }) {
     setGenerating(true)
     setError('')
@@ -127,10 +130,13 @@ export default function Home() {
           includeMetaHook: opts.includeMetaHook,
           previousVideoDescription: opts.previousVideoDescription,
           extraContext: opts.extraContext,
+          isShort: opts.isShort,
         }),
       })
-      const { notebookDoc, youtubeDesc, thumbnailPrompt, error: genErr } = await genRes.json()
-      if (genErr) throw new Error(genErr)
+      const genData = await genRes.json()
+      if (genData.error) throw new Error(genData.error)
+
+      const { shortBrief, notebookDoc, youtubeDesc, thumbnailPrompt } = genData
 
       let pfpImage: string | undefined
       let pfpPrompt: string | undefined
@@ -139,7 +145,10 @@ export default function Home() {
         const pfpRes = await fetch('/api/pfp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ repoName: opts.repoName, notebookDoc }),
+          body: JSON.stringify({
+            repoName: opts.repoName,
+            notebookDoc: opts.isShort ? shortBrief : notebookDoc,
+          }),
         })
         const pfpData = await pfpRes.json()
         if (pfpData.imageData) {
@@ -150,17 +159,21 @@ export default function Home() {
         }
       }
 
-      setOutput({ notebookDoc, youtubeDesc, thumbnailPrompt, pfpImage, pfpPrompt })
+      if (opts.isShort) {
+        setOutput({ isShort: true, shortBrief, thumbnailPrompt, pfpImage, pfpPrompt })
+      } else {
+        setOutput({ isShort: false, notebookDoc, youtubeDesc, thumbnailPrompt, pfpImage, pfpPrompt })
 
-      const draft: Draft = {
-        repoName: opts.repoName,
-        notebookDoc,
-        youtubeDesc,
-        generatedAt: new Date().toISOString(),
+        const draft: Draft = {
+          repoName: opts.repoName,
+          notebookDoc,
+          youtubeDesc,
+          generatedAt: new Date().toISOString(),
+        }
+        const updated = [draft, ...drafts].slice(0, 5)
+        setDrafts(updated)
+        localStorage.setItem('clawd-kit-drafts', JSON.stringify(updated))
       }
-      const updated = [draft, ...drafts].slice(0, 5)
-      setDrafts(updated)
-      localStorage.setItem('clawd-kit-drafts', JSON.stringify(updated))
     } catch (e: any) {
       setError(e.message || 'Generation failed')
     }
@@ -218,7 +231,7 @@ export default function Home() {
 
           <DraftHistory drafts={drafts} onLoad={(d) => {
             setSelectedRepo(d.repoName)
-            setOutput({ notebookDoc: d.notebookDoc, youtubeDesc: d.youtubeDesc })
+            setOutput({ isShort: false, notebookDoc: d.notebookDoc, youtubeDesc: d.youtubeDesc })
           }} />
         </aside>
 
@@ -234,6 +247,8 @@ export default function Home() {
 
           {output && (
             <OutputPanel
+              isShort={output.isShort}
+              shortBrief={output.shortBrief}
               notebookDoc={output.notebookDoc}
               youtubeDesc={output.youtubeDesc}
               thumbnailPrompt={output.thumbnailPrompt}

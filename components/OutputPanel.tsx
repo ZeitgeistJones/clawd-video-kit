@@ -3,8 +3,10 @@
 import { useState } from 'react'
 
 type Props = {
-  notebookDoc: string
-  youtubeDesc: string
+  isShort?: boolean
+  shortBrief?: string
+  notebookDoc?: string
+  youtubeDesc?: string
   thumbnailPrompt?: string
   pfpImage?: string
   pfpPrompt?: string
@@ -76,7 +78,7 @@ function CopyBlock({ label, content, note }: { label: string; content: string; n
   )
 }
 
-export default function OutputPanel({ notebookDoc, youtubeDesc, thumbnailPrompt, pfpImage, pfpPrompt, repoName, onMarkCovered }: Props) {
+export default function OutputPanel({ isShort, shortBrief, notebookDoc, youtubeDesc, thumbnailPrompt, pfpImage, pfpPrompt, repoName, onMarkCovered }: Props) {
   const [videoUrl, setVideoUrl] = useState('')
   const [marked, setMarked] = useState(false)
 
@@ -95,14 +97,28 @@ export default function OutputPanel({ notebookDoc, youtubeDesc, thumbnailPrompt,
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <CopyBlock label="notebooklm source doc" content={notebookDoc} />
-      <CopyBlock label="youtube description" content={youtubeDesc} />
+      {isShort ? (
+        shortBrief && (
+          <CopyBlock
+            label="notebooklm short brief"
+            content={shortBrief}
+            note="targets 30–45 seconds"
+          />
+        )
+      ) : (
+        <>
+          {notebookDoc && <CopyBlock label="notebooklm source doc" content={notebookDoc} />}
+          {youtubeDesc && <CopyBlock label="youtube description" content={youtubeDesc} />}
+        </>
+      )}
 
       {thumbnailPrompt && (
         <CopyBlock
           label="thumbnail prompt"
           content={thumbnailPrompt}
-          note="paste into ChatGPT or Perplexity with the mascot image attached"
+          note={isShort
+            ? '9:16 vertical — paste into ChatGPT or Perplexity with the mascot image attached'
+            : 'paste into ChatGPT or Perplexity with the mascot image attached'}
         />
       )}
 
