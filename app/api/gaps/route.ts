@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 4000,
+      max_tokens: 8000,
       messages: [{ role: 'user', content: prompt }],
     })
 
@@ -26,7 +26,23 @@ export async function POST(req: Request) {
     const clean = text.replace(/```json|```/g, '').trim()
     const result = JSON.parse(clean)
 
-    return NextResponse.json(result)
+    // Claude may omit repos when the list is long — merge so every repo appears
+    const gapMap = new Map(
+      (result.gaps || []).map((g: { repoName: string }) => [g.repoName, g]),
+    )
+    const gaps = filteredRepos.map((r: { name: string; pushedAt: string }) => {
+      const existing = gapMap.get(r.name)
+      if (existing) return existing
+      return {
+        repoName: r.name,
+        status: 'uncovered',
+        matchedVideo: null,
+        repoLastPushed: r.pushedAt,
+        priority: 'high',
+      }
+    })
+
+    return NextResponse.json({ gaps })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
