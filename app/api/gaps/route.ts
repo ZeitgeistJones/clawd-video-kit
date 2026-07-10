@@ -12,6 +12,9 @@ type GapEntry = {
   priority: 'high' | 'medium' | 'low'
 }
 
+type RepoInput = { name: string; pushedAt: string }
+type VideoInput = { title: string; publishedAt: string; description?: string }
+
 function chunk<T>(items: T[], size: number): T[][] {
   const batches: T[][] = []
   for (let i = 0; i < items.length; i += size) {
@@ -20,7 +23,7 @@ function chunk<T>(items: T[], size: number): T[][] {
   return batches
 }
 
-function fallbackGap(repo: { name: string; pushedAt: string }): GapEntry {
+function fallbackGap(repo: RepoInput): GapEntry {
   return {
     repoName: repo.name,
     status: 'uncovered',
@@ -31,7 +34,7 @@ function fallbackGap(repo: { name: string; pushedAt: string }): GapEntry {
 }
 
 async function analyzeBatch(
-  repos: { name: string; pushedAt: string }[],
+  repos: RepoInput[],
   slimVideos: string,
 ): Promise<GapEntry[]> {
   const slimRepos = repos.map((r) => `- ${r.name} (pushed: ${r.pushedAt})`).join('\n')
@@ -69,20 +72,23 @@ async function analyzeBatch(
 
 export async function POST(req: Request) {
   try {
-    const { repos, videos } = await req.json()
+    const { repos, videos } = await req.json() as {
+      repos: RepoInput[]
+      videos: VideoInput[]
+    }
 
     const filteredRepos = repos.filter(
-      (r: { name: string }) => !r.name.startsWith('leftclaw-service-job'),
+      (r) => !r.name.startsWith('leftclaw-service-job'),
     )
 
     const slimVideos = videos
       .map(
-        (v: { title: string; publishedAt: string; description?: string }) =>
+        (v) =>
           `- "${v.title}" | ${v.publishedAt} | ${(v.description || '').slice(0, 80)}`,
       )
       .join('\n')
 
-    const batches = chunk(filteredRepos, BATCH_SIZE)
+    const batches = chunk<RepoInput>(filteredRepos, BATCH_SIZE)
     const batchResults = await Promise.all(
       batches.map((batch) => analyzeBatch(batch, slimVideos)),
     )
