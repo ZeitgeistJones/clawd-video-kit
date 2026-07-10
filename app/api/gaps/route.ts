@@ -56,9 +56,9 @@ async function analyzeBatch(
   const clean = text.replace(/```json|```/g, '').trim()
 
   try {
-    const result = JSON.parse(clean)
-    const gapMap = new Map(
-      (result.gaps || []).map((g: GapEntry) => [g.repoName, g]),
+    const result = JSON.parse(clean) as { gaps?: GapEntry[] }
+    const gapMap = new Map<string, GapEntry>(
+      (result.gaps || []).map((g) => [g.repoName, g]),
     )
     return repos.map((r) => gapMap.get(r.name) ?? fallbackGap(r))
   } catch {
