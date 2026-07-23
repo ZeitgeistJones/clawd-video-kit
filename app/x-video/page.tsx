@@ -124,7 +124,7 @@ export default function XVideoPage() {
       <div>
         <h1 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>X write-up → video</h1>
         <p style={{ fontSize: 12, color: 'var(--text-dim)' }}>
-          Paste an X post or article URL, optionally paste author context (e.g. from Grok on their profile), generate source doc + description + thumbnail prompts.
+          Paste an X post or article URL, optionally paste author context from X&apos;s summary profile tool, generate source doc + description + thumbnail prompts.
         </p>
       </div>
 
@@ -137,7 +137,7 @@ export default function XVideoPage() {
           style={inputStyle}
         />
         <textarea
-          placeholder="Author context — paste notes from Grok / their profile / your research (optional)"
+          placeholder="Author context — paste output from X's 'summary profile' tool (optional)"
           value={authorContext}
           onChange={(e) => setAuthorContext(e.target.value)}
           rows={5}

@@ -15,7 +15,7 @@ Return ONLY valid JSON (no markdown fences, no preamble) matching this shape:
   "title": "punchy video title, under 70 characters",
   "sourceDoc": "a NotebookLM-ready source document: several paragraphs synthesizing the post, the community split/consensus, and 4-6 standout individual voices worth quoting or dramatizing on screen. Written to brief a narrator, not as a script.",
   "description": "YouTube description, 2-4 short paragraphs, plain-English, no jargon-as-drama",
-  "thumbnailPrompts": ["2-3 distinct visual thumbnail concepts, each a single descriptive sentence an image generator or designer could act on"]
+  "thumbnailPrompts": ["2-3 distinct single-composition thumbnail prompts — one continuous scene each, no split-screen/panels/collages, high contrast, scroll-stopping"]
 }`
 
 export async function POST(req: Request) {

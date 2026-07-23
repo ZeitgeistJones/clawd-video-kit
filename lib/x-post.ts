@@ -208,7 +208,7 @@ export function buildFuelText(
   }
 
   if (authorContext?.trim()) {
-    parts.push('AUTHOR CONTEXT (pasted by video creator — use for who they are / angle; do not invent beyond this):')
+    parts.push('AUTHOR CONTEXT (pasted by video creator from X.com "summary profile" tool — use for who they are / angle; do not invent beyond this; attribute the source casually in the doc):')
     parts.push(authorContext.trim())
     parts.push('')
   }

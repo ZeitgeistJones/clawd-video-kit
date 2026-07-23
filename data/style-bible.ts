@@ -76,10 +76,12 @@ FORBIDDEN
 export const THUMBNAIL_CREATIVE_NOTES = `
 THUMBNAIL & VISUAL CREATIVE NOTES
 - Visuals must stop the scroll — bold, specific, attention-grabbing, not safe or generic
+- ONE composition only: a single continuous scene with one clear focal point. Never split-screen, diptych, triptych, side-by-side panels, labeled columns, comparison grids, or collage layouts
 - Avoid generic AI image slop: no vague "futuristic background", no stock-photo energy, no bland corporate aesthetics
 - The scene should feel intentional, funny, or surprising — something a real creator would actually thumbnail, not a template
 - Mascot should be doing something specific and expressive — a pose, reaction, or situation tied to the repo topic
 - High contrast, clear focal point, strong color choices that pop at small sizes
+- Prefer one short punchy text overlay max — not multiple competing captions across panels
 `.trim()
 
 export const META_RESEARCH_HOOK = `

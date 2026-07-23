@@ -23,7 +23,8 @@ The prompt should:
 - Start by telling the AI that the user will attach an image of the CLAWD mascot (a red crystalline diamond/pyramid-shaped character, sometimes in a tuxedo, sometimes in other outfits — the attached image shows the specific mascot to use)
 - Instruct the AI to incorporate the attached mascot as the central character
 - Describe a specific creative scene, pose, and expression for the mascot that fits the repo topic — funny, energetic, attention-grabbing, not generic
-- Suggest bold title text to overlay (short, punchy, relevant to the video)
+- ONE continuous scene only — never split-screen, side-by-side panels, comparison layouts, or collages
+- Suggest bold title text to overlay (short, punchy, relevant to the video) — one overlay max
 - Describe background, color palette, and visual style — vary the style to fit the vibe (comic book, cinematic, cartoon, anime, pop art, retro, etc)
 - Specify 16:9 YouTube thumbnail format
 - Keep it under 150 words, be specific — no vague or stock-photo aesthetics`
