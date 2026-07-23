@@ -18,6 +18,9 @@ export default function SiteHeader() {
           <Link href="/larva-video" className={pathname === '/larva-video' ? 'nav-link active' : 'nav-link'}>
             larva
           </Link>
+          <Link href="/x-video" className={pathname === '/x-video' ? 'nav-link active' : 'nav-link'}>
+            x
+          </Link>
           <Link href="/about" className={pathname === '/about' ? 'nav-link active' : 'nav-link'}>
             about
           </Link>

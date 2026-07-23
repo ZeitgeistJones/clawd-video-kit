@@ -12,6 +12,8 @@ export default function AboutContent() {
       items: [
         'Scan gaps → pick a repo → generate → copy outputs into NotebookLM → generate audio overview.',
         'Use the custom focus block for NotebookLM steering (duration, tone, structure).',
+        'larva — paste a larv.ai forum URL for community-thread videos.',
+        'x — paste an X post/article URL; optionally paste author notes (e.g. from Grok) for background.',
       ],
     },
     {

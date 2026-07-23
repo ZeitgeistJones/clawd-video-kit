@@ -9,6 +9,8 @@ Private video production tool for the Clawd Explains YouTube channel.
 - Gap analysis: finds uncovered + stale repos
 - Repomixes selected repo server-side
 - Generates NotebookLM source doc + YouTube description via Claude
+- `/larva-video` — larv.ai forum post → video pack
+- `/x-video` — X post/article URL + optional author context → video pack
 
 ## Setup
 
