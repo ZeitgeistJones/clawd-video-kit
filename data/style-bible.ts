@@ -73,6 +73,38 @@ FORBIDDEN
 - Never attribute builds or ships to Austin
 `.trim()
 
+/** Paste verbatim into every YouTube description (before the disclaimer). */
+export const OFFICIAL_LINKS_BLOCK = `OFFICIAL LINKS
+clawd.atg.eth contract: 0x9f86db9fc6f7c9408e8fda3ff8ce4e78ac7a6b07
+Crypto Ticker: CLAWD
+Crypto Cashtag: $CLAWD
+
+CoinGecko: https://www.coingecko.com/en/coins/clawd-atg-eth
+Clawd's X: https://x.com/clawdbotatg
+Austin's X: https://x.com/austingriffith
+Website: https://clawdbotatg.eth.link/
+Telegram: https://t.me/ClawdChatTGBot (token gated — need ~10M $CLAWD to join)`.trim()
+
+/** Ensure the canonical official-links block is present in a YouTube description. */
+export function ensureOfficialLinks(description: string): string {
+  const trimmed = (description || '').trim()
+  if (!trimmed) return OFFICIAL_LINKS_BLOCK
+
+  if (/0x9f86db9fc6f7c9408e8fda3ff8ce4e78ac7a6b07/i.test(trimmed)) {
+    return trimmed
+  }
+
+  // Insert before a DISCLAIMER heading if Claude already wrote one
+  const disclaimerMatch = trimmed.match(/\n(?=DISCLAIMER\b)/i)
+  if (disclaimerMatch && disclaimerMatch.index != null) {
+    const before = trimmed.slice(0, disclaimerMatch.index).trimEnd()
+    const after = trimmed.slice(disclaimerMatch.index).trimStart()
+    return `${before}\n\n${OFFICIAL_LINKS_BLOCK}\n\n${after}`
+  }
+
+  return `${trimmed}\n\n${OFFICIAL_LINKS_BLOCK}`
+}
+
 export const THUMBNAIL_CREATIVE_NOTES = `
 THUMBNAIL & VISUAL CREATIVE NOTES
 - Visuals must stop the scroll — bold, specific, attention-grabbing, not safe or generic

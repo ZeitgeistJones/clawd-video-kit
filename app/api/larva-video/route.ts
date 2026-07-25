@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { fetchForumPost, buildFuelText, parseForumPostId } from '@/lib/larva-forum'
+import { OFFICIAL_LINKS_BLOCK, ensureOfficialLinks } from '@/data/style-bible'
 
 const anthropic = new Anthropic()
 
@@ -10,11 +11,17 @@ const GENERATION_SYSTEM_PROMPT = `You are helping produce a YouTube video for "C
 
 Your job: produce structured material a human editor can turn directly into a video. Do NOT pad with filler or generic crypto-YouTuber hype. Ground everything in what the post and responses actually say. Never spell "clawd" as "claude."
 
+YOUTUBE DESCRIPTION must include a short summary, then this OFFICIAL LINKS block EXACTLY as written (do not invent or alter addresses/URLs):
+
+${OFFICIAL_LINKS_BLOCK}
+
+Then the standard disclaimer (not affiliated, not financial advice, DYOR).
+
 Return ONLY valid JSON (no markdown fences, no preamble) matching this shape:
 {
   "title": "punchy video title, under 70 characters",
   "sourceDoc": "a NotebookLM-ready source document: several paragraphs synthesizing the post, the community split/consensus, and 4-6 standout individual voices worth quoting or dramatizing on screen. Written to brief a narrator, not as a script.",
-  "description": "YouTube description, 2-4 short paragraphs, plain-English, no jargon-as-drama",
+  "description": "YouTube description with summary, exact OFFICIAL LINKS block, and standard disclaimer",
   "thumbnailPrompts": ["2-3 distinct single-composition thumbnail prompts — one continuous scene each, no split-screen/panels/collages, high contrast, scroll-stopping"]
 }`
 
@@ -66,6 +73,7 @@ export async function POST(req: Request) {
       postId,
       postTitle: forumData.post.title,
       ...parsed,
+      description: ensureOfficialLinks(parsed.description || ''),
       raw: rawText,
     })
   } catch (err: any) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { fetchXPost, buildFuelText, parseXStatusUrl } from '@/lib/x-post'
+import { OFFICIAL_LINKS_BLOCK, ensureOfficialLinks } from '@/data/style-bible'
 
 const anthropic = new Anthropic()
 
@@ -19,7 +20,11 @@ SOURCE DOC must close with the full mandatory disclaimer sequence (always last):
 4. Check the video description for official links and the verified contract address
 5. Note: the AI narrator sometimes mispronounces the token name — it rhymes with "clawed" not "clod"
 
-YOUTUBE DESCRIPTION must include: a short summary, the source X URL, a note to check official links and contract address, and the standard disclaimer (not affiliated, not financial advice, DYOR). Keep under 500 words.
+YOUTUBE DESCRIPTION must include: a short summary, the source X URL, then this OFFICIAL LINKS block EXACTLY as written (do not invent or alter addresses/URLs):
+
+${OFFICIAL_LINKS_BLOCK}
+
+Then the standard disclaimer (not affiliated, not financial advice, DYOR). Keep prose under 500 words excluding the official links block.
 
 THUMBNAIL RULES: each prompt is ONE single continuous scene — no split-screen, side-by-side panels, comparison layouts, labeled columns, or collages. One focal point, high contrast, scroll-stopping. Prefer incorporating the CLAWD mascot when it fits. Also weave in something recognizable from the poster/author when available (handle, name, brand like "Gem Finderz", bio vibe, or their visual palette from author context) so the thumb reads as "this person's write-up about CLAWD," not a generic CLAWD graphic. Under ~150 words each.
 
@@ -27,7 +32,7 @@ Return ONLY valid JSON (no markdown fences, no preamble) matching this shape:
 {
   "title": "punchy video title, under 70 characters",
   "sourceDoc": "a NotebookLM-ready source document: several paragraphs synthesizing the write-up's thesis, key arguments, and why it matters for CLAWD / the ecosystem. If author context was provided, briefly situate the writer and note the summary-profile source. Written to brief a narrator, not as a script. End with the full disclaimer sequence.",
-  "description": "YouTube description with summary, source URL, official-links note, and standard disclaimer",
+  "description": "YouTube description with summary, source URL, exact OFFICIAL LINKS block, and standard disclaimer",
   "thumbnailPrompts": ["2-3 distinct single-composition thumbnail prompts (no panels/split screens)"]
 }`
 
@@ -81,6 +86,7 @@ export async function POST(req: Request) {
       postUrl: post.url,
       isArticle: post.isArticle,
       ...parsed,
+      description: ensureOfficialLinks(parsed.description || ''),
       raw: rawText,
     })
   } catch (err: any) {

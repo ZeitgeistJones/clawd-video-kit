@@ -37,7 +37,7 @@ export default function AboutContent() {
       items: [
         'NotebookLM source doc / short brief — paste as NotebookLM source.',
         'NotebookLM custom focus — paste into NotebookLM custom topic box when generating audio.',
-        'YouTube description + thumbnail prompt — copy separately.',
+        'YouTube description + thumbnail prompt — copy separately. Descriptions always include the canonical OFFICIAL LINKS block (contract, CoinGecko, X, website, Telegram).',
       ],
     },
     {

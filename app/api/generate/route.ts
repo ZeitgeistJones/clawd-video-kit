@@ -7,6 +7,8 @@ import {
   MEDIUM_BRIEF_NOTES,
   HEYGEN_NOTES,
   THUMBNAIL_CREATIVE_NOTES,
+  OFFICIAL_LINKS_BLOCK,
+  ensureOfficialLinks,
 } from '@/data/style-bible'
 import type { Duration } from '@/types/generate'
 
@@ -56,9 +58,12 @@ Tone throughout: chill, bro energy. Casual language. Genuinely excited. Personab
 A YouTube video description in the voice of an enthusiastic, relatable clawd community member — not generic marketing copy. Include:
 - 2-3 sentence summary of what the video covers
 - The GitHub repo URL: {repoUrl}
-- A note to check official links and contract address
-- The standard disclaimer (not affiliated, not financial advice, DYOR)
-- Keep it under 500 words
+- Then paste this OFFICIAL LINKS block EXACTLY as written (do not invent or alter addresses/URLs):
+
+${OFFICIAL_LINKS_BLOCK}
+
+- Then the standard disclaimer (not affiliated, not financial advice, DYOR)
+- Keep the prose under 500 words excluding the official links block
 
 ${THUMBNAIL_16_9}`
 }
@@ -179,7 +184,7 @@ export async function POST(req: Request) {
 
     const parts = text.split(/---YOUTUBE DESCRIPTION---|---THUMBNAIL PROMPT---/)
     const notebookDoc = (parts[0] || '').replace('---NOTEBOOKLM DOC---', '').trim()
-    const youtubeDesc = (parts[1] || '').trim()
+    const youtubeDesc = ensureOfficialLinks((parts[1] || '').trim())
     const thumbnailPrompt = (parts[2] || '').trim()
 
     return NextResponse.json({ notebookDoc, youtubeDesc, thumbnailPrompt })
