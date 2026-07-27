@@ -2,6 +2,7 @@ import { generateText } from '@/lib/llm'
 import { extractKeywords } from '@/lib/keywords'
 import { unifiedSearchAssets, type Asset } from '@/lib/stock'
 import { scenesToSrt } from '@/lib/srt'
+import { extractJson } from '@/lib/parse-json'
 import type { Duration } from '@/types/generate'
 import type { StoryboardScene, StoryboardResult } from '@/types/storyboard'
 
@@ -47,19 +48,14 @@ async function generateRawScenes(text: string, duration?: Duration): Promise<Raw
   const raw = await generateText({
     system: SCENE_SYSTEM,
     prompt:
-      `Target spoken duration: ~${target} seconds (${duration || 'full'}).\n\n` +
+      `Target spoken duration: ~${target} seconds (${duration || 'full'}).\n` +
+      `Respond with JSON only.\n\n` +
       `Source text:\n\n${text.slice(0, 14000)}`,
     maxOutputTokens: 4000,
+    json: true,
   })
 
-  const cleaned = raw.replace(/```json|```/g, '').trim()
-  let parsed: { scenes?: RawScene[] }
-  try {
-    parsed = JSON.parse(cleaned)
-  } catch {
-    throw new Error('Failed to parse storyboard scenes JSON')
-  }
-
+  const parsed = extractJson<{ scenes?: RawScene[] }>(raw)
   const scenes = (parsed.scenes || []).filter((s) => (s.narration || s.title || '').trim())
   if (scenes.length === 0) {
     throw new Error('Storyboard generation returned no scenes')

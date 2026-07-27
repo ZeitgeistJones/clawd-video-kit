@@ -10,6 +10,8 @@ export type GenerateTextOptions = {
   system?: string
   maxOutputTokens?: number
   model?: string
+  /** Ask Gemini for JSON output when possible. */
+  json?: boolean
 }
 
 /** Shared Gemini text call for all kit generators. */
@@ -21,6 +23,7 @@ export async function generateText(opts: GenerateTextOptions): Promise<string> {
     config: {
       ...(opts.system ? { systemInstruction: opts.system } : {}),
       maxOutputTokens: opts.maxOutputTokens ?? 5000,
+      ...(opts.json ? { responseMimeType: 'application/json' } : {}),
     },
   })
 
