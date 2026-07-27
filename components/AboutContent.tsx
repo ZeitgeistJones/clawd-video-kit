@@ -33,6 +33,13 @@ export default function AboutContent() {
       ],
     },
     {
+      title: 'Storyboard',
+      items: [
+        'After generate, click Generate storyboard for keywords, scenes, Pexels/Pixabay B-roll matches, and SRT.',
+        'Pre-production only — NotebookLM still manual; no renderer yet. LeftClaw PFP/thumbnail flow unchanged.',
+      ],
+    },
+    {
       title: 'Outputs',
       items: [
         'NotebookLM source doc / short brief — paste as NotebookLM source.',

@@ -1,13 +1,8 @@
 import { GoogleGenAI } from '@google/genai'
-
-const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+import { env } from '@/lib/env'
 
 function getClient() {
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not set')
-  }
-  return new GoogleGenAI({ apiKey })
+  return new GoogleGenAI({ apiKey: env.geminiApiKey() })
 }
 
 export type GenerateTextOptions = {
@@ -21,7 +16,7 @@ export type GenerateTextOptions = {
 export async function generateText(opts: GenerateTextOptions): Promise<string> {
   const ai = getClient()
   const response = await ai.models.generateContent({
-    model: opts.model || DEFAULT_MODEL,
+    model: opts.model || env.geminiModel(),
     contents: opts.prompt,
     config: {
       ...(opts.system ? { systemInstruction: opts.system } : {}),
