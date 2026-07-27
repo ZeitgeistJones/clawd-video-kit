@@ -35,7 +35,7 @@ PEXELS_API_KEY=your_key
 PIXABAY_API_KEY=your_key
 ```
 
-Optional: `GEMINI_MODEL=gemini-2.5-pro` (defaults to `gemini-2.5-flash`)
+Optional: `GEMINI_MODEL=gemini-3.6-flash` (this is the default; override if needed)
 
 Compact aliases also work (`GITHUBTOKEN`, `YOUTUBEAPIKEY`, `POSTGRESURL`, etc.).
 

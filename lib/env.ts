@@ -47,5 +47,5 @@ export const env = {
     firstDefined(process.env.PIXABAY_API_KEY, process.env.PIXABAYAPIKEY),
 
   geminiModel: () =>
-    firstDefined(process.env.GEMINI_MODEL, process.env.GEMINIMODEL) || 'gemini-2.5-flash',
+    firstDefined(process.env.GEMINI_MODEL, process.env.GEMINIMODEL) || 'gemini-3.6-flash',
 }
