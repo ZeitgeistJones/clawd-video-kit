@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { generateText } from '@/lib/llm'
 
-const anthropic = new Anthropic()
 const BATCH_SIZE = 25
 
 type GapEntry = {
@@ -49,13 +48,10 @@ async function analyzeBatch(
     'Keep matchedVideo null unless covered/stale. Example:\n' +
     '{"gaps":[{"repoName":"name","status":"uncovered","matchedVideo":null,"repoLastPushed":"ISO","priority":"high"}]}'
 
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 4096,
-    messages: [{ role: 'user', content: prompt }],
+  const text = await generateText({
+    prompt,
+    maxOutputTokens: 4096,
   })
-
-  const text = response.content[0].type === 'text' ? response.content[0].text : ''
   const clean = text.replace(/```json|```/g, '').trim()
 
   try {

@@ -4,7 +4,7 @@ export default function AboutContent() {
       title: 'What this is',
       items: [
         'Private production tool for the Clawd Explains YouTube channel.',
-        'Scans clawdbotatg repos, finds coverage gaps, generates scripts and descriptions via Claude.',
+        'Scans clawdbotatg repos, finds coverage gaps, generates scripts and descriptions via Gemini.',
       ],
     },
     {
@@ -50,7 +50,7 @@ export default function AboutContent() {
     {
       title: 'Regenerate',
       items: [
-        'Forces a fresh Claude generation and overwrites the cached output for that repo.',
+        'Forces a fresh Gemini generation and overwrites the cached output for that repo.',
       ],
     },
     {

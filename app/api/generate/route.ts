@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import {
   STYLE_BIBLE,
   META_RESEARCH_HOOK,
@@ -10,9 +9,8 @@ import {
   OFFICIAL_LINKS_BLOCK,
   ensureOfficialLinks,
 } from '@/data/style-bible'
+import { generateText } from '@/lib/llm'
 import type { Duration } from '@/types/generate'
-
-const anthropic = new Anthropic()
 
 export const maxDuration = 60
 
@@ -167,13 +165,10 @@ export async function POST(req: Request) {
       ? buildShortPrompt(repoName, repoUrl, packed, metaSection, previousContext, extraSection)
       : buildDocPrompt(repoName, repoUrl, packed, dur, isHeyGen, metaSection, previousContext, extraSection)
 
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 5000,
-      messages: [{ role: 'user', content: prompt }],
+    const text = await generateText({
+      prompt,
+      maxOutputTokens: 5000,
     })
-
-    const text = response.content[0].type === 'text' ? response.content[0].text : ''
 
     if (dur === 'short') {
       const parts = text.split(/---THUMBNAIL PROMPT---/)

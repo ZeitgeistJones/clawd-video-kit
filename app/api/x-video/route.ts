@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { fetchXPost, buildFuelText, parseXStatusUrl } from '@/lib/x-post'
 import { OFFICIAL_LINKS_BLOCK, ensureOfficialLinks } from '@/data/style-bible'
-
-const anthropic = new Anthropic()
+import { generateText } from '@/lib/llm'
 
 export const maxDuration = 60
 
@@ -54,14 +52,11 @@ export async function POST(req: Request) {
     const post = await fetchXPost(postUrl)
     const fuelText = buildFuelText(post, authorContext, direction)
 
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4000,
+    const rawText = await generateText({
+      prompt: fuelText,
       system: GENERATION_SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: fuelText }],
+      maxOutputTokens: 4000,
     })
-
-    const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
     const cleaned = rawText.replace(/```json|```/g, '').trim()
 
     let parsed: {

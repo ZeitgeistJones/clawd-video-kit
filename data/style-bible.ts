@@ -94,7 +94,7 @@ export function ensureOfficialLinks(description: string): string {
     return trimmed
   }
 
-  // Insert before a DISCLAIMER heading if Claude already wrote one
+  // Insert before a DISCLAIMER heading if the model already wrote one
   const disclaimerMatch = trimmed.match(/\n(?=DISCLAIMER\b)/i)
   if (disclaimerMatch && disclaimerMatch.index != null) {
     const before = trimmed.slice(0, disclaimerMatch.index).trimEnd()

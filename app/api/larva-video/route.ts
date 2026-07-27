@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { fetchForumPost, buildFuelText, parseForumPostId } from '@/lib/larva-forum'
 import { OFFICIAL_LINKS_BLOCK, ensureOfficialLinks } from '@/data/style-bible'
-
-const anthropic = new Anthropic()
+import { generateText } from '@/lib/llm'
 
 export const maxDuration = 60
 
@@ -44,14 +42,11 @@ export async function POST(req: Request) {
       `${fuelText}\n\n---\nCREATIVE DIRECTION FROM VIDEO CREATOR:\n` +
       (direction?.trim() || '(none provided — use your best judgment based on the post content)')
 
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4000,
+    const rawText = await generateText({
+      prompt: userPrompt,
       system: GENERATION_SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userPrompt }],
+      maxOutputTokens: 4000,
     })
-
-    const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
     const cleaned = rawText.replace(/```json|```/g, '').trim()
 
     let parsed: {
