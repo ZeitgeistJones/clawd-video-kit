@@ -55,6 +55,7 @@ Compact aliases also work (`GITHUBTOKEN`, `YOUTUBEAPIKEY`, `POSTGRESURL`, etc.).
 | POSTGRES_URL | Vercel dashboard → Storage → Postgres |
 | PEXELS_API_KEY | pexels.com/api |
 | PIXABAY_API_KEY | pixabay.com/api/docs |
+| SCORE_BROLL_MOCK | `true` (default) = local scoring; `false` = Gemini relevance scoring |
 
 ## Storyboard (faceless pre-production)
 
@@ -68,8 +69,17 @@ It returns:
 
 Cached in Postgres (`storyboard_cache`) keyed by `repoName + duration + script hash`.
 
+### B-roll relevance scoring (Step 1)
+
+`POST /api/score-broll` with `{ "scenes": [ ...storyboard scenes... ] }`.
+
+Returns scored scenes with `candidates`, `confidence`, `needsReview`, and auto-selected best asset.
+
+Optional body: `{ "forceMock": true }` to force local scoring. Env `SCORE_BROLL_MOCK` defaults to mock.
+
 ### What it does NOT do (yet)
 - NotebookLM audio is still manual
 - No CapCut / Manus / Remotion renderer in this pass
+- No review UI for needsReview yet (Step 2)
 - SRT timings are estimated scene blocks, not word-level captions
 - LeftClaw mascot PFP / thumbnail flow is unchanged

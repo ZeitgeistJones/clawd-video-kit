@@ -28,3 +28,25 @@ export type StoryboardResult = {
   srt: string
   totalDuration: number
 }
+
+/** Candidate b-roll with a relevance score against scene narration. */
+export type BrollCandidate = Asset & {
+  relevanceScore: number
+  reason?: string
+}
+
+/** Scene after auto-match / review scoring. */
+export type ScoredScene = StoryboardScene & {
+  candidates: BrollCandidate[]
+  confidence: number
+  needsReview: boolean
+}
+
+export type ScoreBrollResult = {
+  scenes: ScoredScene[]
+  scoredAt: string
+  mode: 'mock' | 'model'
+}
+
+/** Below this confidence, UI should flag the scene for manual review. */
+export const BROLL_REVIEW_THRESHOLD = 0.45

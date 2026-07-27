@@ -48,4 +48,14 @@ export const env = {
 
   geminiModel: () =>
     firstDefined(process.env.GEMINI_MODEL, process.env.GEMINIMODEL) || 'gemini-3.6-flash',
+
+  /**
+   * B-roll relevance scoring mode.
+   * Default true (mock / local token overlap). Set SCORE_BROLL_MOCK=false for Gemini scoring.
+   */
+  scoreBrollMock: () => {
+    const raw = firstDefined(process.env.SCORE_BROLL_MOCK, process.env.SCOREBROLLMOCK)
+    if (raw == null) return true
+    return !['0', 'false', 'no', 'off'].includes(raw.toLowerCase())
+  },
 }
