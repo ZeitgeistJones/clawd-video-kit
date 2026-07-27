@@ -51,6 +51,7 @@ export default function AboutContent() {
       title: 'Gap report',
       items: [
         'uncovered — no matching video. stale — repo updated since last video. covered — matched.',
+        'Gap scan uses free local name matching (GitHub + YouTube only) — does not burn Gemini/Anthropic quota.',
         'cached badge — previous generation saved; click repo to load instantly.',
       ],
     },

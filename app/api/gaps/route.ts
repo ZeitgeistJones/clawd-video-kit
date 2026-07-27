@@ -1,7 +1,4 @@
 import { NextResponse } from 'next/server'
-import { generateText } from '@/lib/llm'
-
-const BATCH_SIZE = 25
 
 type GapEntry = {
   repoName: string
@@ -12,57 +9,127 @@ type GapEntry = {
 }
 
 type RepoInput = { name: string; pushedAt: string }
-type VideoInput = { title: string; publishedAt: string; description?: string }
-
-function chunk<T>(items: T[], size: number): T[][] {
-  const batches: T[][] = []
-  for (let i = 0; i < items.length; i += size) {
-    batches.push(items.slice(i, i + size))
-  }
-  return batches
+type VideoInput = {
+  id?: string
+  title: string
+  publishedAt: string
+  description?: string
+  url?: string
 }
 
-function fallbackGap(repo: RepoInput): GapEntry {
+/** Free local gap analysis — no Gemini/Anthropic. Matches repo names against video titles/descriptions. */
+
+function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function tokenize(s: string): string[] {
+  const stop = new Set([
+    'clawd', 'clawdbotatg', 'the', 'a', 'an', 'and', 'or', 'of', 'to', 'for',
+    'in', 'on', 'with', 'bot', 'atg', 'repo', 'app', 'api',
+  ])
+  return normalize(s)
+    .split(' ')
+    .filter((t) => t.length >= 2 && !stop.has(t))
+}
+
+function repoSearchForms(repoName: string): string[] {
+  const forms = new Set<string>()
+  const raw = repoName.trim()
+  forms.add(normalize(raw))
+  forms.add(normalize(raw.replace(/^clawd[-_]?/i, '')))
+  forms.add(normalize(raw.replace(/[-_]/g, ' ')))
+  // compact form without separators for titles like "OneDollarAudits"
+  forms.add(normalize(raw).replace(/\s+/g, ''))
+  return [...forms].filter(Boolean)
+}
+
+function scoreMatch(repoName: string, video: VideoInput): number {
+  const hay = normalize(`${video.title} ${video.description || ''}`)
+  const hayCompact = hay.replace(/\s+/g, '')
+  const forms = repoSearchForms(repoName)
+  let score = 0
+
+  for (const form of forms) {
+    if (!form) continue
+    if (hay.includes(form)) score = Math.max(score, form.length >= 8 ? 10 : 7)
+    if (hayCompact.includes(form.replace(/\s+/g, ''))) score = Math.max(score, 8)
+  }
+
+  // token overlap: require most meaningful tokens to appear
+  const tokens = tokenize(repoName)
+  if (tokens.length > 0) {
+    const hits = tokens.filter((t) => hay.includes(t) || hayCompact.includes(t)).length
+    const ratio = hits / tokens.length
+    if (ratio >= 1) score = Math.max(score, 9)
+    else if (ratio >= 0.66 && tokens.length >= 2) score = Math.max(score, 6)
+    else if (ratio >= 0.5 && tokens.some((t) => t.length >= 6 && hay.includes(t))) {
+      score = Math.max(score, 5)
+    }
+  }
+
+  return score
+}
+
+function videoUrl(v: VideoInput): string {
+  if (v.url) return v.url
+  if (v.id) return `https://www.youtube.com/watch?v=${v.id}`
+  return ''
+}
+
+function daysBetween(laterIso: string, earlierIso: string): number {
+  const later = new Date(laterIso).getTime()
+  const earlier = new Date(earlierIso).getTime()
+  if (Number.isNaN(later) || Number.isNaN(earlier)) return 0
+  return (later - earlier) / (1000 * 60 * 60 * 24)
+}
+
+function classifyRepo(repo: RepoInput, videos: VideoInput[]): GapEntry {
+  let best: { video: VideoInput; score: number } | null = null
+
+  for (const video of videos) {
+    const score = scoreMatch(repo.name, video)
+    if (score < 5) continue
+    if (!best || score > best.score) best = { video, score }
+  }
+
+  if (!best) {
+    return {
+      repoName: repo.name,
+      status: 'uncovered',
+      matchedVideo: null,
+      repoLastPushed: repo.pushedAt,
+      priority: 'high',
+    }
+  }
+
+  const stale = daysBetween(repo.pushedAt, best.video.publishedAt) >= 30
+  const matchedVideo = {
+    title: best.video.title,
+    url: videoUrl(best.video),
+    publishedAt: best.video.publishedAt,
+  }
+
+  if (stale) {
+    return {
+      repoName: repo.name,
+      status: 'stale',
+      matchedVideo,
+      repoLastPushed: repo.pushedAt,
+      priority: 'medium',
+    }
+  }
+
   return {
     repoName: repo.name,
-    status: 'uncovered',
-    matchedVideo: null,
+    status: 'covered',
+    matchedVideo,
     repoLastPushed: repo.pushedAt,
-    priority: 'high',
-  }
-}
-
-async function analyzeBatch(
-  repos: RepoInput[],
-  slimVideos: string,
-): Promise<GapEntry[]> {
-  const slimRepos = repos.map((r) => `- ${r.name} (pushed: ${r.pushedAt})`).join('\n')
-
-  const prompt =
-    'Analyze coverage gaps for the Clawd Explains YouTube channel.\n\n' +
-    'REPOS:\n' + slimRepos + '\n\n' +
-    'VIDEOS:\n' + slimVideos + '\n\n' +
-    'For each repo classify as uncovered, stale (repo pushed 30+ days after video), or covered. ' +
-    'Match loosely on repo name in video title or description.\n\n' +
-    'Return ONLY compact JSON with one entry per repo in this batch. ' +
-    'Keep matchedVideo null unless covered/stale. Example:\n' +
-    '{"gaps":[{"repoName":"name","status":"uncovered","matchedVideo":null,"repoLastPushed":"ISO","priority":"high"}]}'
-
-  const text = await generateText({
-    prompt,
-    maxOutputTokens: 4096,
-  })
-  const clean = text.replace(/```json|```/g, '').trim()
-
-  try {
-    const result = JSON.parse(clean) as { gaps?: GapEntry[] }
-    const gapMap = new Map<string, GapEntry>(
-      (result.gaps || []).map((g) => [g.repoName, g]),
-    )
-    return repos.map((r) => gapMap.get(r.name) ?? fallbackGap(r))
-  } catch {
-    // Truncated or malformed JSON — treat batch as uncovered rather than failing the scan
-    return repos.map(fallbackGap)
+    priority: 'low',
   }
 }
 
@@ -73,25 +140,17 @@ export async function POST(req: Request) {
       videos: VideoInput[]
     }
 
+    if (!Array.isArray(repos) || !Array.isArray(videos)) {
+      return NextResponse.json({ error: 'repos and videos arrays are required' }, { status: 400 })
+    }
+
     const filteredRepos = repos.filter(
-      (r) => !r.name.startsWith('leftclaw-service-job'),
+      (r) => r?.name && !r.name.startsWith('leftclaw-service-job'),
     )
 
-    const slimVideos = videos
-      .map(
-        (v) =>
-          `- "${v.title}" | ${v.publishedAt} | ${(v.description || '').slice(0, 80)}`,
-      )
-      .join('\n')
+    const gaps = filteredRepos.map((repo) => classifyRepo(repo, videos))
 
-    const batches = chunk<RepoInput>(filteredRepos, BATCH_SIZE)
-    const batchResults = await Promise.all(
-      batches.map((batch) => analyzeBatch(batch, slimVideos)),
-    )
-
-    const gaps = batchResults.flat()
-
-    return NextResponse.json({ gaps })
+    return NextResponse.json({ gaps, engine: 'local' })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }

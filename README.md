@@ -6,12 +6,14 @@ Private video production tool for the Clawd Explains YouTube channel.
 
 - Scans all clawdbotatg GitHub repos
 - Pulls your Clawd Explains YouTube videos
-- Gap analysis: finds uncovered + stale repos
+- Gap analysis: finds uncovered + stale repos (local name matching — no LLM quota)
 - Repomixes selected repo server-side
 - Generates NotebookLM source doc + YouTube description via Gemini
 - `/larva-video` — larv.ai forum post → video pack
 - `/x-video` — X post/article URL + optional author context → video pack
 - Storyboard pre-production — keywords, scene board, Pexels/Pixabay B-roll matches, SRT export
+
+Gap **rescan** only needs `GITHUB_TOKEN` + `YOUTUBE_API_KEY`. Gemini/Anthropic are only used when you generate docs, storyboards, keywords, etc.
 
 ## Setup
 
