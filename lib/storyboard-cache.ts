@@ -1,6 +1,6 @@
 import { createHash } from 'crypto'
 import { sql } from '@vercel/postgres'
-import type { StoryboardResult } from '@/lib/storyboard'
+import type { StoryboardResult } from '@/types/storyboard'
 
 async function ensureTable() {
   await sql`

@@ -1,18 +1,7 @@
 import { env } from '@/lib/env'
+import type { Asset } from '@/types/storyboard'
 
-export type Asset = {
-  id: string
-  provider: 'pexels' | 'pixabay'
-  kind: 'image' | 'video'
-  url: string
-  thumbUrl?: string
-  width?: number
-  height?: number
-  duration?: number
-  creator?: string
-  query: string
-  score?: number
-}
+export type { Asset } from '@/types/storyboard'
 
 const DEFAULT_PER_PAGE = 8
 

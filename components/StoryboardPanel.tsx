@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import type { Duration } from '@/types/generate'
-import type { Asset } from '@/lib/stock'
-import type { StoryboardScene } from '@/lib/storyboard'
+import type { Asset, StoryboardScene } from '@/types/storyboard'
 
 type StoryboardPayload = {
   scenes: StoryboardScene[]
@@ -155,12 +154,15 @@ export default function StoryboardPanel({ text, repoName, duration }: Props) {
   }
 
   return (
-    <div style={{
-      background: 'var(--surface)',
-      border: '1px solid var(--border)',
-      borderRadius: 'var(--radius)',
-      overflow: 'hidden',
-    }}>
+    <div
+      id="storyboard-panel"
+      style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--accent)',
+        borderRadius: 'var(--radius)',
+        overflow: 'hidden',
+      }}
+    >
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -168,7 +170,7 @@ export default function StoryboardPanel({ text, repoName, duration }: Props) {
         gap: 12,
         padding: '10px 14px',
         borderBottom: '1px solid var(--border)',
-        background: 'var(--surface-2)',
+        background: 'var(--accent-dim)',
       }}>
         <div>
           <div style={{
@@ -176,12 +178,12 @@ export default function StoryboardPanel({ text, repoName, duration }: Props) {
             fontWeight: 600,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            color: 'var(--text-muted)',
+            color: 'var(--accent)',
           }}>
-            storyboard
+            storyboard / b-roll
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 2 }}>
-            keywords → scenes → Pexels/Pixabay B-roll → SRT (pre-production only)
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+            keywords → scenes → Pexels/Pixabay → SRT · scroll here after generate
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>

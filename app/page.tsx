@@ -5,7 +5,6 @@ import GapReport from '@/components/GapReport'
 import GeneratePanel from '@/components/GeneratePanel'
 import OutputPanel from '@/components/OutputPanel'
 import DraftHistory from '@/components/DraftHistory'
-import StoryboardPanel from '@/components/StoryboardPanel'
 import type { Duration, GenerationOutputs } from '@/types/generate'
 
 export type GapEntry = {
@@ -306,27 +305,18 @@ export default function Home() {
         />
 
         {output && (
-          <>
-            <OutputPanel
-              duration={output.duration}
-              isHeyGen={output.isHeyGen}
-              shortBrief={output.shortBrief}
-              notebookDoc={output.notebookDoc}
-              youtubeDesc={output.youtubeDesc}
-              thumbnailPrompt={output.thumbnailPrompt}
-              pfpImage={output.pfpImage}
-              pfpPrompt={output.pfpPrompt}
-              repoName={selectedRepo}
-              onMarkCovered={markCovered}
-            />
-            <StoryboardPanel
-              text={output.duration === 'short'
-                ? (output.shortBrief || '')
-                : (output.notebookDoc || '')}
-              repoName={selectedRepo}
-              duration={output.duration || 'full'}
-            />
-          </>
+          <OutputPanel
+            duration={output.duration}
+            isHeyGen={output.isHeyGen}
+            shortBrief={output.shortBrief}
+            notebookDoc={output.notebookDoc}
+            youtubeDesc={output.youtubeDesc}
+            thumbnailPrompt={output.thumbnailPrompt}
+            pfpImage={output.pfpImage}
+            pfpPrompt={output.pfpPrompt}
+            repoName={selectedRepo}
+            onMarkCovered={markCovered}
+          />
         )}
       </div>
     </div>

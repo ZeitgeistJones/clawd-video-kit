@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { NOTEBOOKLM_SHORT_FOCUS, NOTEBOOKLM_FULL_FOCUS, NOTEBOOKLM_MEDIUM_FOCUS } from '@/data/style-bible'
 import type { Duration } from '@/types/generate'
+import StoryboardPanel from '@/components/StoryboardPanel'
 
 type Props = {
   duration?: Duration
@@ -207,6 +208,12 @@ export default function OutputPanel({
           </div>
         </div>
       )}
+
+      <StoryboardPanel
+        text={duration === 'short' ? (shortBrief || '') : (notebookDoc || '')}
+        repoName={repoName}
+        duration={duration || 'full'}
+      />
 
       <div style={{
         background: 'var(--surface)',

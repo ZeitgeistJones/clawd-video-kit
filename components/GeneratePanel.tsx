@@ -285,6 +285,27 @@ export default function GeneratePanel({
             regenerate
           </button>
         )}
+        {hasOutput && (
+          <button
+            type="button"
+            onClick={() => {
+              document.getElementById('storyboard-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            style={{
+              background: 'var(--accent-dim)',
+              color: 'var(--accent)',
+              border: '1px solid var(--accent)',
+              borderRadius: 'var(--radius)',
+              padding: '10px 14px',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'var(--font)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            ↓ storyboard
+          </button>
+        )}
       </div>
     </div>
   )

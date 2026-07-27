@@ -3,23 +3,9 @@ import { extractKeywords } from '@/lib/keywords'
 import { unifiedSearchAssets, type Asset } from '@/lib/stock'
 import { scenesToSrt } from '@/lib/srt'
 import type { Duration } from '@/types/generate'
+import type { StoryboardScene, StoryboardResult } from '@/types/storyboard'
 
-export type StoryboardScene = {
-  index: number
-  title: string
-  narration: string
-  estimatedDuration: number
-  searchQueries: string[]
-  selectedAsset: Asset | null
-  backupAssets: Asset[]
-}
-
-export type StoryboardResult = {
-  scenes: StoryboardScene[]
-  keywords: string[]
-  srt: string
-  totalDuration: number
-}
+export type { StoryboardScene, StoryboardResult } from '@/types/storyboard'
 
 type RawScene = {
   title?: string
