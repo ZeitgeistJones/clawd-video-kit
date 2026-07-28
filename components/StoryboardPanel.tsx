@@ -17,6 +17,10 @@ type Props = {
   text: string
   repoName: string
   duration: Duration
+  onPipelineChange?: (payload: {
+    scoredScenes: ScoredScene[] | null
+    srt: string | null
+  }) => void
 }
 
 function CopyBlock({ label, content, note }: { label: string; content: string; note?: string }) {
@@ -106,7 +110,7 @@ function SectionHeader({ id, title, hint }: { id: string; title: string; hint?: 
   )
 }
 
-export default function StoryboardPanel({ text, repoName, duration }: Props) {
+export default function StoryboardPanel({ text, repoName, duration, onPipelineChange }: Props) {
   const [loading, setLoading] = useState(false)
   const [scoring, setScoring] = useState(false)
   const [error, setError] = useState('')
@@ -115,7 +119,11 @@ export default function StoryboardPanel({ text, repoName, duration }: Props) {
   const [scoreMode, setScoreMode] = useState<'mock' | 'model' | null>(null)
   const [scoredAt, setScoredAt] = useState<string | null>(null)
 
-  async function scoreScenes(scenes: StoryboardScene[]) {
+  function publishPipeline(nextScenes: ScoredScene[] | null, srt: string | null) {
+    onPipelineChange?.({ scoredScenes: nextScenes, srt })
+  }
+
+  async function scoreScenes(scenes: StoryboardScene[], srt: string) {
     setScoring(true)
     try {
       const res = await fetch('/api/score-broll', {
@@ -128,9 +136,11 @@ export default function StoryboardPanel({ text, repoName, duration }: Props) {
       setScoredScenes(data.scenes)
       setScoreMode(data.mode)
       setScoredAt(data.scoredAt)
+      publishPipeline(data.scenes, srt)
     } catch (e: any) {
       setError(e.message || 'B-roll scoring failed')
       setScoredScenes(null)
+      publishPipeline(null, srt)
     } finally {
       setScoring(false)
     }
@@ -146,6 +156,7 @@ export default function StoryboardPanel({ text, repoName, duration }: Props) {
     setScoredScenes(null)
     setScoreMode(null)
     setScoredAt(null)
+    publishPipeline(null, null)
     try {
       const res = await fetch('/api/storyboard', {
         method: 'POST',
@@ -156,7 +167,7 @@ export default function StoryboardPanel({ text, repoName, duration }: Props) {
       if (!res.ok) throw new Error(data.error || 'Storyboard failed')
       setResult(data)
       setLoading(false)
-      await scoreScenes(data.scenes)
+      await scoreScenes(data.scenes, data.srt || '')
     } catch (e: any) {
       setError(e.message || 'Storyboard failed')
       setLoading(false)
@@ -326,7 +337,10 @@ export default function StoryboardPanel({ text, repoName, duration }: Props) {
           scenes={scoredScenes}
           mode={scoreMode || undefined}
           scoredAt={scoredAt || undefined}
-          onScenesChange={setScoredScenes}
+          onScenesChange={(next) => {
+            setScoredScenes(next)
+            publishPipeline(next, result?.srt || null)
+          }}
         />
       ) : (
         <div style={{

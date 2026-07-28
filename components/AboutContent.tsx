@@ -33,10 +33,11 @@ export default function AboutContent() {
       ],
     },
     {
-      title: 'Storyboard + b-roll',
+      title: 'Storyboard + b-roll + draft',
       items: [
-        'After generate: Script → Storyboard → B-roll review → Captions (upload/draft come in Step 3).',
-        'Generate storyboard auto-scores stock picks; default view shows needs-review scenes only — toggle to see all scores; click a thumb to swap.',
+        'Flow: Script → Storyboard → B-roll review → Captions → Upload/Draft.',
+        'Generate storyboard auto-scores stock picks; review needs-review scenes; swap thumbs as needed.',
+        'Draft video: paste/upload NotebookLM audio, toggle captions, render MP4 (Remotion under the hood).',
         'LeftClaw PFP/thumbnail flow unchanged under Script.',
       ],
     },

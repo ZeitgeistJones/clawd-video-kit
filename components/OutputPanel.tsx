@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { NOTEBOOKLM_SHORT_FOCUS, NOTEBOOKLM_FULL_FOCUS, NOTEBOOKLM_MEDIUM_FOCUS } from '@/data/style-bible'
 import type { Duration } from '@/types/generate'
+import type { ScoredScene } from '@/types/storyboard'
 import StoryboardPanel from '@/components/StoryboardPanel'
+import DraftVideoPanel from '@/components/DraftVideoPanel'
 
 type Props = {
   duration?: Duration
@@ -101,29 +103,6 @@ function SectionHeader({ id, title, hint }: { id?: string; title: string; hint?:
   )
 }
 
-function ComingSoon({ label, hint }: { label: string; hint: string }) {
-  return (
-    <div style={{
-      background: 'var(--surface)',
-      border: '1px dashed var(--border-strong)',
-      borderRadius: 'var(--radius)',
-      padding: 14,
-    }}>
-      <div style={{
-        fontSize: 11,
-        fontWeight: 600,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        color: 'var(--text-muted)',
-        marginBottom: 6,
-      }}>
-        {label}
-      </div>
-      <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>{hint}</div>
-    </div>
-  )
-}
-
 function notebookFocusForDuration(duration?: Duration) {
   if (duration === 'short') return NOTEBOOKLM_SHORT_FOCUS
   if (duration === 'medium') return NOTEBOOKLM_MEDIUM_FOCUS
@@ -151,6 +130,7 @@ export default function OutputPanel({
 }: Props) {
   const [videoUrl, setVideoUrl] = useState('')
   const [marked, setMarked] = useState(false)
+  const [scoredScenes, setScoredScenes] = useState<ScoredScene[] | null>(null)
 
   function handleMark() {
     onMarkCovered(repoName, videoUrl)
@@ -262,27 +242,31 @@ export default function OutputPanel({
         text={duration === 'short' ? (shortBrief || '') : (notebookDoc || '')}
         repoName={repoName}
         duration={duration || 'full'}
+        onPipelineChange={({ scoredScenes: next }) => setScoredScenes(next)}
       />
 
       <SectionHeader
         id="upload-section"
         title="5 · upload assets"
-        hint="narration audio for draft render"
+        hint="narration audio lives in the draft panel below"
       />
-      <ComingSoon
-        label="coming in step 3"
-        hint="Paste a NotebookLM audio URL or upload a narration file here."
-      />
+      <div style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius)',
+        padding: 14,
+        fontSize: 12,
+        color: 'var(--text-dim)',
+      }}>
+        Paste a NotebookLM audio URL or upload an audio file in <strong style={{ color: 'var(--text-muted)' }}>6 · draft video</strong>.
+      </div>
 
       <SectionHeader
-        id="draft-video"
+        id="draft-section"
         title="6 · draft video"
         hint="automated Remotion draft — no CapCut"
       />
-      <ComingSoon
-        label="coming in step 3"
-        hint="Render a rough MP4 from scored b-roll + narration + captions."
-      />
+      <DraftVideoPanel scenes={scoredScenes} repoName={repoName} />
 
       <div style={{
         background: 'var(--surface)',
