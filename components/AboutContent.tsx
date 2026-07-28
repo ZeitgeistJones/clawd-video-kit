@@ -33,10 +33,11 @@ export default function AboutContent() {
       ],
     },
     {
-      title: 'Storyboard',
+      title: 'Storyboard + b-roll',
       items: [
-        'After generate, click Generate storyboard for keywords, scenes, Pexels/Pixabay B-roll matches, and SRT.',
-        'Pre-production only — NotebookLM still manual; no renderer yet. LeftClaw PFP/thumbnail flow unchanged.',
+        'After generate: Script → Storyboard → B-roll review → Captions (upload/draft come in Step 3).',
+        'Generate storyboard auto-scores stock picks; default view shows needs-review scenes only — toggle to see all scores; click a thumb to swap.',
+        'LeftClaw PFP/thumbnail flow unchanged under Script.',
       ],
     },
     {

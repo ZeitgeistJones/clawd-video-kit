@@ -77,9 +77,11 @@ Returns scored scenes with `candidates`, `confidence`, `needsReview`, and auto-s
 
 Optional body: `{ "forceMock": true }` to force local scoring. Env `SCORE_BROLL_MOCK` defaults to mock.
 
+On the kit dashboard, **Generate storyboard** calls this automatically. B-roll review defaults to needs-review scenes; toggle “show all scenes (with scores)” and click a thumb to swap the pick.
+
 ### What it does NOT do (yet)
 - NotebookLM audio is still manual
-- No CapCut / Manus / Remotion renderer in this pass
-- No review UI for needsReview yet (Step 2)
+- Upload assets + draft Remotion render (Step 3)
+- No CapCut / Manus
 - SRT timings are estimated scene blocks, not word-level captions
 - LeftClaw mascot PFP / thumbnail flow is unchanged

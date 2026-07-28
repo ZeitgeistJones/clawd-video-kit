@@ -82,6 +82,48 @@ function CopyBlock({ label, content, note }: { label: string; content: string; n
   )
 }
 
+function SectionHeader({ id, title, hint }: { id?: string; title: string; hint?: string }) {
+  return (
+    <div id={id} style={{ marginTop: 4 }}>
+      <div style={{
+        fontSize: 11,
+        fontWeight: 600,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        color: 'var(--accent)',
+      }}>
+        {title}
+      </div>
+      {hint && (
+        <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 2 }}>{hint}</div>
+      )}
+    </div>
+  )
+}
+
+function ComingSoon({ label, hint }: { label: string; hint: string }) {
+  return (
+    <div style={{
+      background: 'var(--surface)',
+      border: '1px dashed var(--border-strong)',
+      borderRadius: 'var(--radius)',
+      padding: 14,
+    }}>
+      <div style={{
+        fontSize: 11,
+        fontWeight: 600,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        color: 'var(--text-muted)',
+        marginBottom: 6,
+      }}>
+        {label}
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>{hint}</div>
+    </div>
+  )
+}
+
 function notebookFocusForDuration(duration?: Duration) {
   if (duration === 'short') return NOTEBOOKLM_SHORT_FOCUS
   if (duration === 'medium') return NOTEBOOKLM_MEDIUM_FOCUS
@@ -125,6 +167,12 @@ export default function OutputPanel({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <SectionHeader
+        id="script-section"
+        title="1 · script"
+        hint="NotebookLM doc, description, focus, thumbnail / mascot"
+      />
+
       {duration === 'short' ? (
         shortBrief && (
           <CopyBlock
@@ -200,6 +248,7 @@ export default function OutputPanel({
             </button>
           </div>
           <div style={{ padding: 14, display: 'flex', justifyContent: 'center' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={pfpImage.startsWith('data:') ? pfpImage : `data:image/png;base64,${pfpImage}`}
               alt="clawd mascot"
@@ -213,6 +262,26 @@ export default function OutputPanel({
         text={duration === 'short' ? (shortBrief || '') : (notebookDoc || '')}
         repoName={repoName}
         duration={duration || 'full'}
+      />
+
+      <SectionHeader
+        id="upload-section"
+        title="5 · upload assets"
+        hint="narration audio for draft render"
+      />
+      <ComingSoon
+        label="coming in step 3"
+        hint="Paste a NotebookLM audio URL or upload a narration file here."
+      />
+
+      <SectionHeader
+        id="draft-video"
+        title="6 · draft video"
+        hint="automated Remotion draft — no CapCut"
+      />
+      <ComingSoon
+        label="coming in step 3"
+        hint="Render a rough MP4 from scored b-roll + narration + captions."
       />
 
       <div style={{
