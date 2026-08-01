@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { generateMascotScene } from '@/lib/mascot-scene'
+import { logPfpBurn, updatePfpBurnLeftclaw } from '@/lib/pfp-burn-log'
 
 const CLAWD_TOKEN = '0x9f86dB9fc6f7c9408e8Fda3Ff8ce4e78ac7a6b07'
 const DEAD_ADDRESS = '0x000000000000000000000000000000000000dEaD'
@@ -48,13 +49,24 @@ export async function POST(req: Request) {
       throw new Error('Wallet not configured')
     }
 
-    // Prefer the shared scene from generate (aligned with thumbnail); otherwise invent one.
     const prompt =
       typeof providedPrompt === 'string' && providedPrompt.trim()
         ? providedPrompt.trim()
         : await generateMascotScene(repoName, notebookDoc || '')
 
     const txHash = await burnClawd()
+
+    // Persist for Ash Ledger before LeftClaw call — burn already happened on-chain.
+    try {
+      await logPfpBurn({
+        txHash,
+        address: walletAddress,
+        prompt,
+        repoName: typeof repoName === 'string' ? repoName : undefined,
+      })
+    } catch (logErr: any) {
+      console.error('pfp burn log failed:', logErr?.message || logErr)
+    }
 
     const pfpRes = await fetch('https://leftclaw-services-nextjs.vercel.app/api/pfp/generate-payment', {
       method: 'POST',
@@ -68,15 +80,23 @@ export async function POST(req: Request) {
 
     if (!pfpRes.ok) {
       const err = await pfpRes.text()
+      try {
+        await updatePfpBurnLeftclaw(txHash, false, err.slice(0, 500))
+      } catch {}
       throw new Error(`PFP generation failed: ${err}`)
     }
 
     const data = await pfpRes.json()
+    try {
+      await updatePfpBurnLeftclaw(txHash, true)
+    } catch {}
 
     return NextResponse.json({
       imageData: data.image || data.imageData || data.data,
       prompt,
       txHash,
+      app: 'clawd-video-kit',
+      productTag: 'leftclaw-pfp',
     })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })

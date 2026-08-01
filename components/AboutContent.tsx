@@ -38,7 +38,7 @@ export default function AboutContent() {
       items: [
         'Extra context — anything not in the repo (tweets, community context, launches).',
         'HeyGen mode — teleprompter-style single-presenter script (full/medium only).',
-        'Meta-research hook, episode continuity, LeftClaw mascot PFP (costs 1000 CLAWD) — thumbnail prompt locks to that same scene.',
+        'Meta-research hook, episode continuity, LeftClaw mascot PFP (costs 1000 CLAWD from kit wallet) — thumbnail locks to that scene; burns logged in pfp_burns for Ash Ledger.',
       ],
     },
     {
