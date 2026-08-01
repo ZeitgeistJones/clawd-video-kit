@@ -5,6 +5,7 @@ const nextConfig = {
       '@remotion/bundler',
       '@remotion/renderer',
       'remotion',
+      'ffmpeg-static',
     ],
   },
 }

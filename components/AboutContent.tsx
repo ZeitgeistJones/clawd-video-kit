@@ -33,11 +33,11 @@ export default function AboutContent() {
       ],
     },
     {
-      title: 'Storyboard + b-roll',
+      title: 'Storyboard + b-roll + draft',
       items: [
-        'Optional pre-production: Script → Storyboard → B-roll review → Captions.',
-        'Generate storyboard auto-scores stock picks; review needs-review scenes; swap thumbs as needed.',
-        'Export SRT for rough captions. Audio overview stays in NotebookLM — the kit does not ingest or render it.',
+        'Optional: Script → Storyboard → B-roll → Captions → Draft.',
+        'Generate storyboard auto-scores stock; review needs-review scenes; swap thumbs as needed.',
+        'Draft: upload NotebookLM’s video export (MP4). The kit strips the audio — no share-URL paste.',
         'LeftClaw PFP/thumbnail flow unchanged under Script.',
       ],
     },

@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { NOTEBOOKLM_SHORT_FOCUS, NOTEBOOKLM_FULL_FOCUS, NOTEBOOKLM_MEDIUM_FOCUS } from '@/data/style-bible'
 import type { Duration } from '@/types/generate'
+import type { ScoredScene } from '@/types/storyboard'
 import StoryboardPanel from '@/components/StoryboardPanel'
+import DraftVideoPanel from '@/components/DraftVideoPanel'
 
 type Props = {
   duration?: Duration
@@ -128,6 +130,7 @@ export default function OutputPanel({
 }: Props) {
   const [videoUrl, setVideoUrl] = useState('')
   const [marked, setMarked] = useState(false)
+  const [scoredScenes, setScoredScenes] = useState<ScoredScene[] | null>(null)
 
   function handleMark() {
     onMarkCovered(repoName, videoUrl)
@@ -245,7 +248,32 @@ export default function OutputPanel({
         text={duration === 'short' ? (shortBrief || '') : (notebookDoc || '')}
         repoName={repoName}
         duration={duration || 'full'}
+        onPipelineChange={({ scoredScenes: next }) => setScoredScenes(next)}
       />
+
+      <SectionHeader
+        id="upload-section"
+        title="5 · narration"
+        hint="NotebookLM video export — audio stripped automatically"
+      />
+      <div style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius)',
+        padding: 14,
+        fontSize: 12,
+        color: 'var(--text-dim)',
+      }}>
+        Download the video from NotebookLM (not a share URL), then upload the MP4 in{' '}
+        <strong style={{ color: 'var(--text-muted)' }}>6 · draft video</strong>. We strip the audio track for the draft.
+      </div>
+
+      <SectionHeader
+        id="draft-section"
+        title="6 · draft video"
+        hint="MP4 in → audio strip → Remotion still draft"
+      />
+      <DraftVideoPanel scenes={scoredScenes} repoName={repoName} />
 
       <div style={{
         background: 'var(--surface)',

@@ -56,6 +56,7 @@ Compact aliases also work (`GITHUBTOKEN`, `YOUTUBEAPIKEY`, `POSTGRESURL`, etc.).
 | PEXELS_API_KEY | pexels.com/api |
 | PIXABAY_API_KEY | pixabay.com/api/docs |
 | SCORE_BROLL_MOCK | `true` (default) = local scoring; `false` = Gemini relevance scoring |
+| BLOB_READ_WRITE_TOKEN | Vercel Blob (optional — otherwise drafts/audio save under `tmp/` locally) |
 
 ## Storyboard (faceless pre-production)
 
@@ -75,8 +76,19 @@ Cached in Postgres (`storyboard_cache`) keyed by `repoName + duration + script h
 
 On the kit dashboard, **Generate storyboard** calls this automatically. B-roll review defaults to needs-review scenes; toggle “show all scenes (with scores)” and click a thumb to swap the pick.
 
+### Draft render (Remotion)
+
+1. Finish storyboard + b-roll review  
+2. In NotebookLM, download the **video** export (MP4 — audio inside is what we want)  
+3. In **6 · draft video**, upload that MP4 — the kit strips audio via ffmpeg (`POST /api/upload-audio`)  
+4. Toggle captions → **render draft** (`POST /api/render`)  
+5. Download the Remotion still-sequence MP4  
+
+Prefer local/`next dev` or a long-timeout host — Remotion + ffmpeg can exceed short serverless limits. Large NotebookLM exports may also hit request body limits on Vercel hobby.
+
 ### What it does NOT do
-- NotebookLM audio overview stays in NotebookLM — the kit does not ingest, scrape, or render it
-- No CapCut / Manus / full timeline editor / automated draft MP4
+- No NotebookLM share-URL scrape (upload the MP4 file instead)
+- No CapCut / Manus / full timeline editor
 - SRT timings are estimated scene blocks, not word-level captions
+- Video stock is burned in as stills (thumbs) in v1 drafts
 - LeftClaw mascot PFP / thumbnail flow is unchanged
