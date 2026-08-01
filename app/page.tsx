@@ -67,10 +67,14 @@ export default function Home() {
       const res = await fetch(`/api/generation-cache?repoName=${encodeURIComponent(repoName)}`)
       const { cache } = await res.json()
       if (cache) {
-        setOutput(cache)
+        const cinematic = cache.lane === 'cinematic' || Boolean(cache.cinematicCustomizePaste)
+        setOutput({
+          ...cache,
+          emphasisSource: cache.emphasisSource || (cinematic ? cache.notebookDoc : undefined),
+        })
         setDuration(cache.duration || 'full')
         setIsHeyGen(cache.isHeyGen || false)
-        if (cache.lane === 'cinematic' || cache.cinematicCustomizePaste) {
+        if (cinematic) {
           setLane('cinematic')
         } else if (cache.lane === 'classic' || cache.lane === 'draft') {
           setLane(cache.lane === 'draft' ? 'draft' : 'classic')
@@ -197,17 +201,17 @@ export default function Home() {
       const {
         shortBrief,
         notebookDoc,
+        emphasisSource,
         youtubeDesc,
         thumbnailPrompt,
         mascotScene,
-        steeringPrompt,
-        sourceEmphasis,
-        visualStyleGuidance,
-        runtimeScope,
-        sceneFocusNotes,
+        focusGuidance,
+        feelNotes,
+        narratorBlock,
         cinematicCustomizePaste,
       } = genData
       const generatedAt = new Date().toISOString()
+      const emphasis = emphasisSource || notebookDoc
 
       let pfpImage: string | undefined
       let pfpPrompt: string | undefined = mascotScene || undefined
@@ -218,7 +222,7 @@ export default function Home() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             repoName: opts.repoName,
-            notebookDoc: opts.duration === 'short' ? shortBrief : notebookDoc,
+            notebookDoc: opts.duration === 'short' ? shortBrief : emphasis,
             prompt: mascotScene || undefined,
           }),
         })
@@ -241,14 +245,13 @@ export default function Home() {
         generatedAt,
         ...(isCinematic
           ? {
-              notebookDoc,
+              emphasisSource: emphasis,
+              notebookDoc: emphasis,
               youtubeDesc,
               thumbnailPrompt,
-              steeringPrompt,
-              sourceEmphasis,
-              visualStyleGuidance,
-              runtimeScope,
-              sceneFocusNotes,
+              focusGuidance,
+              feelNotes,
+              narratorBlock,
               cinematicCustomizePaste,
             }
           : opts.duration === 'short'
@@ -256,14 +259,20 @@ export default function Home() {
             : { notebookDoc, youtubeDesc, thumbnailPrompt }),
       }
 
-      const newOutput: OutputState = { ...cachePayload, pfpImage, pfpPrompt }
+      // Keep full pack in session for download — do not persist huge packs in Postgres.
+      const newOutput: OutputState = {
+        ...cachePayload,
+        pfpImage,
+        pfpPrompt,
+        ...(isCinematic ? { packedRepo: packed } : {}),
+      }
       setOutput(newOutput)
       await saveGenerationCache(opts.repoName, cachePayload)
 
-      if ((isCinematic || opts.duration !== 'short') && notebookDoc && youtubeDesc) {
+      if ((isCinematic || opts.duration !== 'short') && emphasis && youtubeDesc) {
         const draft: Draft = {
           repoName: opts.repoName,
-          notebookDoc,
+          notebookDoc: emphasis,
           youtubeDesc,
           generatedAt,
         }
@@ -355,14 +364,14 @@ export default function Home() {
             isHeyGen={output.isHeyGen}
             shortBrief={output.shortBrief}
             notebookDoc={output.notebookDoc}
+            emphasisSource={output.emphasisSource}
+            packedRepo={output.packedRepo}
             youtubeDesc={output.youtubeDesc}
             thumbnailPrompt={output.thumbnailPrompt}
             cinematicCustomizePaste={output.cinematicCustomizePaste}
-            steeringPrompt={output.steeringPrompt}
-            sourceEmphasis={output.sourceEmphasis}
-            visualStyleGuidance={output.visualStyleGuidance}
-            runtimeScope={output.runtimeScope}
-            sceneFocusNotes={output.sceneFocusNotes}
+            narratorBlock={output.narratorBlock}
+            focusGuidance={output.focusGuidance}
+            feelNotes={output.feelNotes}
             pfpImage={output.pfpImage}
             pfpPrompt={output.pfpPrompt}
             repoName={selectedRepo}

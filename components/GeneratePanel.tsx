@@ -132,8 +132,9 @@ export default function GeneratePanel({
         </div>
         {lane === 'cinematic' && (
           <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 8, lineHeight: 1.5 }}>
-            Tuned for NotebookLM → Video Overview → <strong style={{ color: 'var(--text-muted)' }}>Cinematic</strong>.
-            Copy the cinematic customize paste into NLM&apos;s steering box (style lives there — no carousel).
+            Dual source: download <strong style={{ color: 'var(--text-muted)' }}>repo pack</strong> +{' '}
+            <strong style={{ color: 'var(--text-muted)' }}>emphasis</strong>, then paste the{' '}
+            <strong style={{ color: 'var(--text-muted)' }}>normie customize</strong> into Studio → Video Overview → Cinematic.
           </div>
         )}
         {lane === 'draft' && (

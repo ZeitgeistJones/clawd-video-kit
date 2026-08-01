@@ -12,15 +12,16 @@ export default function AboutContent() {
       items: [
         'Three lanes: Classic (NLM audio/doc), Cinematic (NLM Cinematic Video Overview), Draft (storyboard → strip MP4 audio → Remotion).',
         'Classic: scan → pick repo → generate → copy source + custom focus into NotebookLM audio overview.',
-        'Cinematic: generate cinematic package → paste source doc → paste cinematic customize into Studio → Video Overview → Cinematic.',
+        'Cinematic: download repo pack + emphasis source → paste normie customize into Studio → Video Overview → Cinematic.',
         'larva / x — separate pages for forum and X write-up packs.',
       ],
     },
     {
-      title: 'Cinematic package',
+      title: 'Cinematic package (dual source)',
       items: [
-        'Cinematic customize paste — one block for NLM steering (style + narrative; Cinematic has no style carousel).',
-        'Also: cinematic source doc, steering-only, source emphasis, visual style, runtime/scope, scene focus notes.',
+        'Source 1 — repo pack download (kit packer, ~80k cap) for full context.',
+        'Source 2 — emphasis brief: what to prioritize; hard rule not to narrate the whole pack.',
+        'Customize paste — Talk Normie “normie” narrator + focus + light feel (not animation tech dumps).',
         'YouTube description + thumbnail still included for publish.',
       ],
     },

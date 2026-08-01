@@ -233,58 +233,60 @@ Tone: cool, personable, genuinely engaged — no try-hard slang. Credit builds t
 Optional: if NotebookLM suggests focus buttons, pick whichever fits the repo topic best, or skip all of them.`
 
 /**
- * NotebookLM Cinematic Video Overview — format-specific notes.
- * Cinematic has no separate Visual Style picker; style + narrative go in the customize / steering box.
+ * NotebookLM Cinematic Video Overview — dual-source + normie narrator customize.
+ * Full repo pack = source 1; emphasis brief = source 2; customize paste steers the messenger only.
  */
 export const CINEMATIC_PRODUCTION_NOTES = `
-== NOTEBOOKLM CINEMATIC VIDEO OVERVIEW ==
+== NOTEBOOKLM CINEMATIC VIDEO OVERVIEW (DUAL SOURCE) ==
 
 TARGET PRODUCT
 - NotebookLM Studio → Video Overview → Format: Cinematic (English only)
-- Cinematic uses generative visuals + storytelling (not Explainer slide decks / Whiteboard presets)
-- There is NO separate Visual Style carousel for Cinematic — put look + story direction in the customize / steering prompt
+- User will upload TWO sources: (1) full packed repo file (2) the EMPHASIS SOURCE you write
+- Customize / steering box steers the NARRATOR in plain English — NOT an animation shot list
 
-SOURCE DOC RULES
-- Write a flowing source narrative NotebookLM can film, not a teleprompter script and not labeled chapters
-- Prefer concrete visualizable moments: what we see, what changes, what the agent builds, what the viewer should feel
-- Still Clawd Explains voice: cool, easygoing, specific — no Gen Z slang, no corporate AI slop
+EMPHASIS SOURCE (source 2 — companion to the full repo pack)
+- Short steering companion (~400–800 words), NOT a second full technical essay
+- Open by saying this document steers focus alongside the full repository pack
+- List 4–7 key parts of the repo to prioritize (can be lightly specific)
+- Hard rules for the VIDEO: plain-English narration for smart non-developers; skip deep implementation tours; use the repo pack only to stay accurate / fill gaps — never narrate the whole pack
 - Credit builds to clawdbotatg; Austin is kill switch only if natural
-- Close with the mandatory disclaimer sequence
+- Brief disclaimer pointers OK (not affiliated, not financial advice, DYOR, verify sources)
+- Do NOT dump hex colors, RPC/CORS/VRF tours, or architecture walkthroughs into the spoken video instructions
 
-CINEMATIC CUSTOMIZE BOX (steering)
-- One paste-ready director brief for "How would you like the video to be customized?" / custom topic
-- Must explicitly say: Format intent = Cinematic immersive video (not Explainer, not Short)
-- Include: narrative angle, what to emphasize vs skip, visual language (palette, motion, metaphor), pacing/runtime, tone
-- Ask for fluid scenes and visual metaphors over bullet slides or talking-head graphics
-- Keep under ~350 words so it fits the customize field comfortably
+CUSTOMIZE BOX (narrator only — Talk Normie "normie" / smart friend)
+- NARRATOR block is provided by the host app (normie voice kit) — you generate FOCUS + FEEL only
+- FOCUS: plain-English what to hit / skip for outsiders; forbid walking through proxies, CORS, selectors, file dumps even if in the pack
+- FEEL: 2–4 everyday visual lines max (dark, clear, modern) — NO hex codes, NO glassmorphism, NO animation director tech
+- Never Gen Z slang; never whitepaper voice; never corporate hype
+`.trim()
+
+export const CINEMATIC_EMPHASIS_RULES = `
+This file is a steering companion to the full repository pack uploaded alongside it.
+Use the pack for accuracy and missing context. Do NOT turn the video into a reading of the pack.
+Spoken narration must stay plain English for smart people who are not developers.
 `.trim()
 
 export type CinematicPackageFields = {
-  steeringPrompt: string
-  sourceEmphasis: string
-  visualStyleGuidance: string
-  runtimeScope: string
-  sceneFocusNotes: string
+  /** Fixed normie voice block from data/normieVoice.ts */
+  narratorBlock: string
+  /** Repo-specific plain-English focus lines from the model */
+  focusGuidance: string
+  /** Light everyday visual feel — not tech direction */
+  feelNotes: string
 }
 
-/** One paste for NotebookLM Cinematic customize — style has no separate picker. */
+/** One paste for NotebookLM Cinematic customize — narrator-first, dual-source aware. */
 export function buildCinematicCustomizePaste(fields: CinematicPackageFields): string {
   return [
-    'FORMAT: Cinematic Video Overview (English). Immersive generative visuals + storytelling — not Explainer slides, not Short.',
+    'FORMAT: Cinematic Video Overview (English). Immersive storytelling video — not Explainer slides, not Short.',
     '',
-    'STEERING / NARRATIVE',
-    fields.steeringPrompt.trim(),
+    'NARRATOR',
+    fields.narratorBlock.trim(),
     '',
-    'EMPHASIZE / DE-EMPHASIZE',
-    fields.sourceEmphasis.trim(),
+    'FOCUS',
+    fields.focusGuidance.trim(),
     '',
-    'VISUAL LANGUAGE (bake into direction — Cinematic has no style carousel)',
-    fields.visualStyleGuidance.trim(),
-    '',
-    'RUNTIME & SCOPE',
-    fields.runtimeScope.trim(),
-    '',
-    'SCENE BEATS (molding notes, not a timed edit)',
-    fields.sceneFocusNotes.trim(),
+    'FEEL (light)',
+    fields.feelNotes.trim(),
   ].join('\n')
 }

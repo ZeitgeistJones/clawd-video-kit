@@ -14,27 +14,47 @@ type Props = {
   isHeyGen?: boolean
   shortBrief?: string
   notebookDoc?: string
+  emphasisSource?: string
+  packedRepo?: string
   youtubeDesc?: string
   thumbnailPrompt?: string
   cinematicCustomizePaste?: string
-  steeringPrompt?: string
-  sourceEmphasis?: string
-  visualStyleGuidance?: string
-  runtimeScope?: string
-  sceneFocusNotes?: string
+  narratorBlock?: string
+  focusGuidance?: string
+  feelNotes?: string
   pfpImage?: string
   pfpPrompt?: string
   repoName: string
   onMarkCovered: (repoName: string, videoUrl: string) => void
 }
 
-function CopyBlock({ label, content, note }: { label: string; content: string; note?: string }) {
+function CopyBlock({
+  label,
+  content,
+  note,
+  downloadName,
+}: {
+  label: string
+  content: string
+  note?: string
+  downloadName?: string
+}) {
   const [copied, setCopied] = useState(false)
 
   function copy() {
     navigator.clipboard.writeText(content)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  function download() {
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = downloadName || `${label.replace(/\s+/g, '-')}.md`
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -51,29 +71,51 @@ function CopyBlock({ label, content, note }: { label: string; content: string; n
         padding: '10px 14px',
         borderBottom: '1px solid var(--border)',
         background: 'var(--surface-2)',
+        gap: 8,
       }}>
-        <div>
+        <div style={{ minWidth: 0 }}>
           <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
             {label}
           </span>
           {note && <span style={{ fontSize: 11, color: 'var(--text-dim)', marginLeft: 8 }}>{note}</span>}
         </div>
-        <button
-          onClick={copy}
-          style={{
-            background: copied ? 'var(--success-dim)' : 'var(--accent-dim)',
-            color: copied ? 'var(--success)' : 'var(--accent)',
-            border: `1px solid ${copied ? 'var(--success)' : 'var(--accent)'}`,
-            borderRadius: 4,
-            padding: '3px 10px',
-            fontSize: 11,
-            cursor: 'pointer',
-            fontFamily: 'var(--font)',
-            transition: 'all 0.15s',
-          }}
-        >
-          {copied ? '✓ copied' : 'copy'}
-        </button>
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+          {downloadName && (
+            <button
+              type="button"
+              onClick={download}
+              style={{
+                background: 'var(--surface)',
+                color: 'var(--text-muted)',
+                border: '1px solid var(--border-strong)',
+                borderRadius: 4,
+                padding: '3px 10px',
+                fontSize: 11,
+                cursor: 'pointer',
+                fontFamily: 'var(--font)',
+              }}
+            >
+              download
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={copy}
+            style={{
+              background: copied ? 'var(--success-dim)' : 'var(--accent-dim)',
+              color: copied ? 'var(--success)' : 'var(--accent)',
+              border: `1px solid ${copied ? 'var(--success)' : 'var(--accent)'}`,
+              borderRadius: 4,
+              padding: '3px 10px',
+              fontSize: 11,
+              cursor: 'pointer',
+              fontFamily: 'var(--font)',
+              transition: 'all 0.15s',
+            }}
+          >
+            {copied ? '✓ copied' : 'copy'}
+          </button>
+        </div>
       </div>
       <pre style={{
         padding: '14px',
@@ -131,14 +173,14 @@ export default function OutputPanel({
   isHeyGen,
   shortBrief,
   notebookDoc,
+  emphasisSource,
+  packedRepo,
   youtubeDesc,
   thumbnailPrompt,
   cinematicCustomizePaste,
-  steeringPrompt,
-  sourceEmphasis,
-  visualStyleGuidance,
-  runtimeScope,
-  sceneFocusNotes,
+  narratorBlock,
+  focusGuidance,
+  feelNotes,
   pfpImage,
   pfpPrompt,
   repoName,
@@ -148,6 +190,7 @@ export default function OutputPanel({
   const [marked, setMarked] = useState(false)
   const [scoredScenes, setScoredScenes] = useState<ScoredScene[] | null>(null)
   const isCinematic = lane === 'cinematic' || Boolean(cinematicCustomizePaste)
+  const emphasis = emphasisSource || (isCinematic ? notebookDoc : undefined)
 
   function handleMark() {
     onMarkCovered(repoName, videoUrl)
@@ -168,11 +211,70 @@ export default function OutputPanel({
         id="script-section"
         title="1 · script"
         hint={isCinematic
-          ? 'Cinematic source + NLM customize paste + publish assets'
+          ? 'Dual source: repo pack + emphasis → normie customize paste → publish'
           : 'NotebookLM doc, description, focus, thumbnail / mascot'}
       />
 
-      {duration === 'short' && !isCinematic ? (
+      {isCinematic && (
+        <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius)',
+          padding: 14,
+          fontSize: 12,
+          color: 'var(--text-dim)',
+          lineHeight: 1.6,
+        }}>
+          <div style={{ color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>NotebookLM checklist</div>
+          <ol style={{ margin: 0, paddingLeft: 18 }}>
+            <li>Upload <strong style={{ color: 'var(--text-muted)' }}>repo pack (source 1)</strong></li>
+            <li>Upload <strong style={{ color: 'var(--text-muted)' }}>emphasis source (source 2)</strong></li>
+            <li>Studio → Video Overview → <strong style={{ color: 'var(--text-muted)' }}>Cinematic</strong> → paste customize</li>
+          </ol>
+        </div>
+      )}
+
+      {isCinematic ? (
+        <>
+          {packedRepo && (
+            <CopyBlock
+              label="repo pack (source 1)"
+              content={packedRepo}
+              note="download & upload into NotebookLM — full pack for context (~80k cap)"
+              downloadName={`repomix-${repoName || 'repo'}.md`}
+            />
+          )}
+          {emphasis && (
+            <CopyBlock
+              label="emphasis source (source 2)"
+              content={emphasis}
+              note="steering companion — what to prioritize; do not narrate the whole pack"
+              downloadName={`emphasis-${repoName || 'repo'}.md`}
+            />
+          )}
+          {cinematicCustomizePaste && (
+            <CopyBlock
+              label="cinematic customize paste"
+              content={cinematicCustomizePaste}
+              note="normie narrator + focus + feel — paste into Cinematic customize / steering"
+            />
+          )}
+          {narratorBlock && (
+            <CopyBlock
+              label="narrator voice"
+              content={narratorBlock}
+              note="Talk Normie smart-friend block (also inside customize paste)"
+            />
+          )}
+          {focusGuidance && (
+            <CopyBlock label="focus" content={focusGuidance} note="what to hit / skip in plain English" />
+          )}
+          {feelNotes && (
+            <CopyBlock label="feel" content={feelNotes} note="light visual mood — not tech direction" />
+          )}
+          {youtubeDesc && <CopyBlock label="youtube description" content={youtubeDesc} />}
+        </>
+      ) : duration === 'short' ? (
         shortBrief && (
           <CopyBlock
             label="notebooklm short brief"
@@ -184,60 +286,18 @@ export default function OutputPanel({
         <>
           {notebookDoc && (
             <CopyBlock
-              label={isCinematic ? 'cinematic source doc' : 'notebooklm source doc'}
+              label="notebooklm source doc"
               content={notebookDoc}
-              note={isCinematic
-                ? 'paste as NotebookLM source — visual-beat friendly for Cinematic'
-                : docNote(duration, isHeyGen)}
+              note={docNote(duration, isHeyGen)}
             />
           )}
           {youtubeDesc && <CopyBlock label="youtube description" content={youtubeDesc} />}
+          <CopyBlock
+            label="notebooklm custom focus"
+            content={notebookFocusForDuration(duration)}
+            note="paste into NotebookLM's custom topic box when generating audio"
+          />
         </>
-      )}
-
-      {isCinematic ? (
-        <>
-          {cinematicCustomizePaste && (
-            <CopyBlock
-              label="cinematic customize paste"
-              content={cinematicCustomizePaste}
-              note="Studio → Video Overview → Cinematic → paste into customize / steering (style is in here — no carousel)"
-            />
-          )}
-          {steeringPrompt && (
-            <CopyBlock
-              label="steering only"
-              content={steeringPrompt}
-              note="shorter — narrative angle alone if the full paste is too long"
-            />
-          )}
-          {sourceEmphasis && (
-            <CopyBlock label="source emphasis" content={sourceEmphasis} note="what to stress vs skip" />
-          )}
-          {visualStyleGuidance && (
-            <CopyBlock
-              label="visual style guidance"
-              content={visualStyleGuidance}
-              note="baked into customize paste — Cinematic has no style picker"
-            />
-          )}
-          {runtimeScope && (
-            <CopyBlock label="runtime / scope" content={runtimeScope} />
-          )}
-          {sceneFocusNotes && (
-            <CopyBlock
-              label="scene focus notes"
-              content={sceneFocusNotes}
-              note="molding beats — not a timed edit"
-            />
-          )}
-        </>
-      ) : (
-        <CopyBlock
-          label="notebooklm custom focus"
-          content={notebookFocusForDuration(duration)}
-          note="paste into NotebookLM's custom topic box when generating audio"
-        />
       )}
 
       {thumbnailPrompt && (

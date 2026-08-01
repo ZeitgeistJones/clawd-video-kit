@@ -4,11 +4,12 @@ export type Duration = 'full' | 'medium' | 'short'
 export type WorkflowLane = 'classic' | 'cinematic' | 'draft'
 
 export type CinematicOutputs = {
-  steeringPrompt?: string
-  sourceEmphasis?: string
-  visualStyleGuidance?: string
-  runtimeScope?: string
-  sceneFocusNotes?: string
+  /** Source 2 — steering companion to the full repo pack */
+  emphasisSource?: string
+  /** Fixed normie voice block used in customize paste */
+  narratorBlock?: string
+  focusGuidance?: string
+  feelNotes?: string
   /** One paste for NotebookLM Cinematic customize box */
   cinematicCustomizePaste?: string
 }
@@ -21,5 +22,7 @@ export type GenerationOutputs = {
   notebookDoc?: string
   youtubeDesc?: string
   thumbnailPrompt?: string
+  /** Full packed repo text for download as NLM source 1 (cinematic) */
+  packedRepo?: string
   generatedAt: string
 } & CinematicOutputs
