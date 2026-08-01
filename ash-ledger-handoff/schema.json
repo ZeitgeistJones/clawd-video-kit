@@ -1,0 +1,28 @@
+{
+  "table": "pfp_burns",
+  "app": "clawd-video-kit",
+  "productTag": "leftclaw-pfp",
+  "creditModel": "Burner = Transfer.from (address). productTag leftclaw-pfp is LeftClaw PFP payment note only — do not credit LeftClaw as CLAWD burner.",
+  "amountClawd": "1000",
+  "chain": "base",
+  "token": "0x9f86dB9fc6f7c9408e8Fda3Ff8ce4e78ac7a6b07",
+  "deadAddress": "0x000000000000000000000000000000000000dEaD",
+  "fields": {
+    "txHash": { "type": "string", "required": true, "description": "Burn transaction hash on Base" },
+    "app": { "type": "string", "required": true, "example": "clawd-video-kit" },
+    "productTag": { "type": "string", "required": true, "example": "leftclaw-pfp", "description": "Payment/service tag, not burner" },
+    "burnedAt": { "type": "string", "format": "date-time", "required": true },
+    "address": { "type": "string", "required": true, "description": "Burner wallet (Transfer.from)" },
+    "amountClawd": { "type": "string", "required": true, "example": "1000" },
+    "chain": { "type": "string", "required": true, "example": "base" },
+    "prompt": { "type": "string", "required": false, "description": "LeftClaw scene prompt" },
+    "repoName": { "type": "string", "required": false },
+    "leftclawOk": { "type": "boolean|null", "required": false, "description": "Whether generate-payment succeeded after burn" },
+    "leftclawError": { "type": "string|null", "required": false },
+    "note": { "type": "string", "required": true, "description": "Human credit-model note for Ash" }
+  },
+  "export": {
+    "json": "GET /api/pfp-burns",
+    "csv": "GET /api/pfp-burns?format=csv"
+  }
+}

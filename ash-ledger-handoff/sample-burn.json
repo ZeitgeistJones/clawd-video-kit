@@ -1,0 +1,14 @@
+{
+  "txHash": "0xREPLACE_WITH_REAL_TX_AFTER_FIRST_LOGGED_BURN",
+  "app": "clawd-video-kit",
+  "productTag": "leftclaw-pfp",
+  "burnedAt": "2026-08-01T22:00:00.000Z",
+  "address": "REPLACE_WITH_WALLET_ADDRESS",
+  "amountClawd": "1000",
+  "chain": "base",
+  "prompt": "wearing a hoodie coding on a glowing laptop",
+  "repoName": "example-repo",
+  "leftclawOk": true,
+  "leftclawError": null,
+  "note": "LeftClaw PFP payment. Burner = Transfer.from wallet. LeftClaw is payment tag only — do not credit LeftClaw as CLAWD burner."
+}

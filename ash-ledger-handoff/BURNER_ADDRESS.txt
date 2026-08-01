@@ -1,0 +1,5 @@
+BURNER_ADDRESS=
+
+# Paste the public Base address from clawd-video-kit Vercel env WALLET_ADDRESS.
+# This is Transfer.from for all kit LeftClaw PFP burns.
+# Shared with other products using the same wallet — confirm product list with owner.
