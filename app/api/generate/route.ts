@@ -36,7 +36,7 @@ function buildDocSection(isHeyGen: boolean, duration: 'full' | 'medium') {
     : 'Target 5-6 minutes of spoken audio.'
 
   return `---NOTEBOOKLM DOC---
-A flowing narrative script for NotebookLM — NOT a structured document with labeled sections or chapter headers. Write it as one continuous piece that a chill, hyped, funny, relatable narrator would deliver naturally. It should feel like a knowledgeable friend explaining something exciting, not a school presentation or AI-generated explainer.
+A flowing narrative script for NotebookLM — NOT a structured document with labeled sections or chapter headers. Write it as one continuous piece that a cool, funny, relatable narrator would deliver naturally — without Gen Z slang or try-hard coolness. It should feel like a knowledgeable friend explaining something interesting, not a school presentation or AI-generated explainer.
 
 ${durationNote}
 
@@ -50,7 +50,7 @@ The narrative must naturally weave in these beats (without labeling them):
 - The build: acknowledge the speed and quality, don't make humans the bottleneck
 - Close with the full mandatory disclaimer sequence from the production notes
 
-Tone throughout: chill, bro energy. Casual language. Genuinely excited. Personable and specific — never sterile, never generic AI slop.
+Tone throughout: cool and easygoing. Casual conversational English — no "cap", "ngl", "lowkey", "bruh", or other Gen Z slang. Genuinely interested. Personable and specific — never sterile, never try-hard, never generic AI slop.
 
 ---YOUTUBE DESCRIPTION---
 A YouTube video description in the voice of an enthusiastic, relatable clawd community member — not generic marketing copy. Include:
@@ -88,7 +88,7 @@ Generate TWO outputs:
 ---NOTEBOOKLM SHORT BRIEF---
 Write ONE flowing punchy paragraph for NotebookLM to riff on in under 45 seconds. No chapter headers, no labeled sections, no disclaimer. Audience is normies who don't know clawd — write plain english anyone can follow. You may briefly mention "an AI agent named clawdbotatg" but don't explain the ecosystem. Hook in the first sentence, explain what the repo does in one understandable line, say why it's wild or impressive in one line, and close with energy that makes viewers want to click the channel to learn more.
 
-Sound human and personable — genuinely excited about this specific repo. Funny and relatable only when it comes naturally. Don't force slang, jokes, or analogies. NOT a presenter, NOT generic AI hype.
+Sound human and personable — genuinely interested in this specific repo. Funny and relatable only when it comes naturally. No Gen Z slang, no forced jokes or analogies. NOT a presenter, NOT generic AI hype.
 
 ---THUMBNAIL PROMPT---
 A precise, ready-to-paste image generation prompt for ChatGPT or Perplexity.
