@@ -184,9 +184,15 @@ export default function OutputPanel({
         <CopyBlock
           label="thumbnail prompt"
           content={thumbnailPrompt}
-          note={duration === 'short'
-            ? '9:16 vertical — paste into ChatGPT or Perplexity with the mascot image attached'
-            : 'paste into ChatGPT or Perplexity with the mascot image attached'}
+          note={
+            pfpPrompt
+              ? (duration === 'short'
+                ? `9:16 — attach the LeftClaw mascot below (${pfpPrompt})`
+                : `attach the LeftClaw mascot below (${pfpPrompt})`)
+              : (duration === 'short'
+                ? '9:16 vertical — paste into ChatGPT or Perplexity with the mascot image attached'
+                : 'paste into ChatGPT or Perplexity with the mascot image attached')
+          }
         />
       )}
 
@@ -207,7 +213,7 @@ export default function OutputPanel({
           }}>
             <div>
               <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                clawd mascot
+                leftclaw mascot
               </span>
               {pfpPrompt && <span style={{ fontSize: 11, color: 'var(--text-dim)', marginLeft: 8 }}>"{pfpPrompt}"</span>}
             </div>

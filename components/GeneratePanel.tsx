@@ -217,7 +217,7 @@ export default function GeneratePanel({
             style={{ accentColor: 'var(--accent)', width: 14, height: 14 }}
           />
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-            generate mascot pfp <span style={{ color: 'var(--text-dim)' }}>(burns 1000 CLAWD)</span>
+            generate LeftClaw mascot <span style={{ color: 'var(--text-dim)' }}>(burns 1000 CLAWD · locks thumbnail)</span>
           </span>
         </label>
       </div>

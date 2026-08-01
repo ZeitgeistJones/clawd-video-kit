@@ -1,25 +1,9 @@
 import { NextResponse } from 'next/server'
-import { generateText } from '@/lib/llm'
+import { generateMascotScene } from '@/lib/mascot-scene'
 
 const CLAWD_TOKEN = '0x9f86dB9fc6f7c9408e8Fda3Ff8ce4e78ac7a6b07'
 const DEAD_ADDRESS = '0x000000000000000000000000000000000000dEaD'
 const BURN_AMOUNT = BigInt('1000000000000000000000') // 1000 CLAWD in wei
-const BASE_CHAIN_ID = 8453
-
-async function generateThumbnailPrompt(repoName: string, notebookDoc: string): Promise<string> {
-  try {
-    return await generateText({
-      prompt: `Based on this repo "${repoName}" and its description below, write a short creative scene description for the CLAWD mascot (a red crystalline lobster in a tuxedo) that captures the vibe of this project. Keep it under 20 words, visual and fun. Examples: "wearing a hoodie coding on a glowing laptop", "as a pirate captain on a blockchain ship", "presenting a smart contract on a giant screen".
-
-Repo context: ${notebookDoc.slice(0, 500)}
-
-Return ONLY the scene description, nothing else.`,
-      maxOutputTokens: 200,
-    })
-  } catch {
-    return 'as a cool developer with a glowing screen'
-  }
-}
 
 async function burnClawd(): Promise<string> {
   const { createWalletClient, createPublicClient, http, parseAbi } = await import('viem')
@@ -46,7 +30,6 @@ async function burnClawd(): Promise<string> {
     args: [DEAD_ADDRESS as `0x${string}`, BURN_AMOUNT],
   })
 
-  // wait for confirmation
   const publicClient = createPublicClient({
     chain: base,
     transport: http(),
@@ -58,20 +41,21 @@ async function burnClawd(): Promise<string> {
 
 export async function POST(req: Request) {
   try {
-    const { repoName, notebookDoc } = await req.json()
+    const { repoName, notebookDoc, prompt: providedPrompt } = await req.json()
 
     const walletAddress = process.env.WALLET_ADDRESS
     if (!process.env.WALLET_PRIVATE_KEY || !walletAddress) {
       throw new Error('Wallet not configured')
     }
 
-    // generate scene prompt from repo context
-    const prompt = await generateThumbnailPrompt(repoName, notebookDoc)
+    // Prefer the shared scene from generate (aligned with thumbnail); otherwise invent one.
+    const prompt =
+      typeof providedPrompt === 'string' && providedPrompt.trim()
+        ? providedPrompt.trim()
+        : await generateMascotScene(repoName, notebookDoc || '')
 
-    // burn 1000 CLAWD
     const txHash = await burnClawd()
 
-    // call pfp generator
     const pfpRes = await fetch('https://leftclaw-services-nextjs.vercel.app/api/pfp/generate-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

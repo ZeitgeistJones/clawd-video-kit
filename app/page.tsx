@@ -178,16 +178,20 @@ export default function Home() {
           extraContext: opts.extraContext,
           duration: opts.duration,
           isHeyGen: opts.isHeyGen,
+          // Lock thumbnail to the LeftClaw scene when generating a new PFP,
+          // or reuse an existing PFP scene on regenerate-without-pfp.
+          lockMascot: opts.generatePfp,
+          mascotScene: opts.generatePfp ? undefined : output?.pfpPrompt,
         }),
       })
       const genData = await genRes.json()
       if (genData.error) throw new Error(genData.error)
 
-      const { shortBrief, notebookDoc, youtubeDesc, thumbnailPrompt } = genData
+      const { shortBrief, notebookDoc, youtubeDesc, thumbnailPrompt, mascotScene } = genData
       const generatedAt = new Date().toISOString()
 
       let pfpImage: string | undefined
-      let pfpPrompt: string | undefined
+      let pfpPrompt: string | undefined = mascotScene || undefined
 
       if (opts.generatePfp) {
         const pfpRes = await fetch('/api/pfp', {
@@ -196,15 +200,20 @@ export default function Home() {
           body: JSON.stringify({
             repoName: opts.repoName,
             notebookDoc: opts.duration === 'short' ? shortBrief : notebookDoc,
+            prompt: mascotScene || undefined,
           }),
         })
         const pfpData = await pfpRes.json()
         if (pfpData.imageData) {
           pfpImage = pfpData.imageData
-          pfpPrompt = pfpData.prompt
+          pfpPrompt = pfpData.prompt || mascotScene || undefined
         } else if (pfpData.error) {
           setError('PFP generation failed: ' + pfpData.error)
         }
+      } else if (output?.pfpImage && output?.pfpPrompt) {
+        // Keep previous mascot when regenerating docs without a new PFP burn
+        pfpImage = output.pfpImage
+        pfpPrompt = output.pfpPrompt
       }
 
       const cachePayload: GenerationOutputs = {

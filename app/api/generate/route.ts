@@ -10,26 +10,33 @@ import {
   ensureOfficialLinks,
 } from '@/data/style-bible'
 import { generateText } from '@/lib/llm'
+import {
+  generateMascotScene,
+  thumbnailMascotLockNotes,
+  thumbnailMascotOpenNotes,
+} from '@/lib/mascot-scene'
 import type { Duration } from '@/types/generate'
 
 export const maxDuration = 60
 
-const THUMBNAIL_16_9 = `---THUMBNAIL PROMPT---
+function buildThumbnailSection(aspect: '16:9' | '9:16', mascotScene?: string) {
+  const notes = mascotScene
+    ? thumbnailMascotLockNotes(mascotScene, aspect)
+    : thumbnailMascotOpenNotes(aspect)
+
+  return `---THUMBNAIL PROMPT---
 A precise, ready-to-paste image generation prompt for ChatGPT or Perplexity.
 
 ${THUMBNAIL_CREATIVE_NOTES}
 
-The prompt should:
-- Start by telling the AI that the user will attach an image of the CLAWD mascot (a red crystalline diamond/pyramid-shaped character, sometimes in a tuxedo, sometimes in other outfits — the attached image shows the specific mascot to use)
-- Instruct the AI to incorporate the attached mascot as the central character
-- Describe a specific creative scene, pose, and expression for the mascot that fits the repo topic — funny, energetic, attention-grabbing, not generic
-- ONE continuous scene only — never split-screen, side-by-side panels, comparison layouts, or collages
-- Suggest bold title text to overlay (short, punchy, relevant to the video) — one overlay max
-- Describe background, color palette, and visual style — vary the style to fit the vibe (comic book, cinematic, cartoon, anime, pop art, retro, etc)
-- Specify 16:9 YouTube thumbnail format
-- Keep it under 150 words, be specific — no vague or stock-photo aesthetics`
+${notes}`
+}
 
-function buildDocSection(isHeyGen: boolean, duration: 'full' | 'medium') {
+function buildDocSection(
+  isHeyGen: boolean,
+  duration: 'full' | 'medium',
+  mascotScene?: string,
+) {
   const heygenSection = isHeyGen ? `\n\n${HEYGEN_NOTES}` : ''
   const durationNote = duration === 'medium'
     ? 'Target 2-3 minutes of spoken audio — condensed but complete, all beats present.'
@@ -63,7 +70,7 @@ ${OFFICIAL_LINKS_BLOCK}
 - Then the standard disclaimer (not affiliated, not financial advice, DYOR)
 - Keep the prose under 500 words excluding the official links block
 
-${THUMBNAIL_16_9}`
+${buildThumbnailSection('16:9', mascotScene)}`
 }
 
 function buildShortPrompt(
@@ -73,6 +80,7 @@ function buildShortPrompt(
   metaSection: string,
   previousContext: string,
   extraSection: string,
+  mascotScene?: string,
 ) {
   return `You are generating a tight NotebookLM short brief and a vertical thumbnail prompt for a YouTube Short about the clawdbotatg GitHub repo: ${repoName} (${repoUrl}).
 
@@ -90,19 +98,7 @@ Write ONE flowing punchy paragraph for NotebookLM to riff on in under 45 seconds
 
 Sound human and personable — genuinely interested in this specific repo. Funny and relatable only when it comes naturally. No Gen Z slang, no forced jokes or analogies. NOT a presenter, NOT generic AI hype.
 
----THUMBNAIL PROMPT---
-A precise, ready-to-paste image generation prompt for ChatGPT or Perplexity.
-
-${THUMBNAIL_CREATIVE_NOTES}
-
-The prompt should:
-- Start by telling the AI that the user will attach an image of the CLAWD mascot (a red crystalline diamond/pyramid-shaped character, sometimes in a tuxedo, sometimes in other outfits — the attached image shows the specific mascot to use)
-- Instruct the AI to incorporate the attached mascot as the central character
-- Describe a specific creative scene, pose, and expression for the mascot that fits the repo topic — funny, energetic, attention-grabbing, not generic
-- Suggest bold title text to overlay (short, punchy, relevant to the short)
-- Describe background, color palette, and visual style — vary the style to fit the vibe (comic book, cinematic, cartoon, anime, pop art, retro, etc)
-- Specify 9:16 vertical YouTube Shorts format
-- Keep it under 150 words, be specific — no vague or stock-photo aesthetics
+${buildThumbnailSection('9:16', mascotScene)}
 
 Return both sections clearly separated by the ---NOTEBOOKLM SHORT BRIEF--- and ---THUMBNAIL PROMPT--- headers.`
 }
@@ -116,9 +112,10 @@ function buildDocPrompt(
   metaSection: string,
   previousContext: string,
   extraSection: string,
+  mascotScene?: string,
 ) {
   const durationNotes = duration === 'medium' ? `\n\n${MEDIUM_BRIEF_NOTES}` : ''
-  const docSection = buildDocSection(isHeyGen, duration).replace('{repoUrl}', repoUrl)
+  const docSection = buildDocSection(isHeyGen, duration, mascotScene).replace('{repoUrl}', repoUrl)
 
   return `You are generating a NotebookLM source document, a YouTube description, and a thumbnail prompt for a video about the clawdbotatg GitHub repo: ${repoName} (${repoUrl}).
 
@@ -148,6 +145,8 @@ export async function POST(req: Request) {
       extraContext,
       duration = 'full',
       isHeyGen = false,
+      mascotScene: providedScene,
+      lockMascot = false,
     } = await req.json()
 
     const metaSection = includeMetaHook ? `\n\n${META_RESEARCH_HOOK}` : ''
@@ -160,10 +159,20 @@ export async function POST(req: Request) {
       ? `\n\nEXTRA CONTEXT FROM CREATOR (not in the repo — factor this in):\n${extraContext}`
       : ''
 
+    let mascotScene =
+      typeof providedScene === 'string' && providedScene.trim()
+        ? providedScene.trim()
+        : undefined
+
+    // When LeftClaw PFP will be generated (or aligned), lock one shared scene first.
+    if (!mascotScene && lockMascot) {
+      mascotScene = await generateMascotScene(repoName, packed || '')
+    }
+
     const dur = duration as Duration
     const prompt = dur === 'short'
-      ? buildShortPrompt(repoName, repoUrl, packed, metaSection, previousContext, extraSection)
-      : buildDocPrompt(repoName, repoUrl, packed, dur, isHeyGen, metaSection, previousContext, extraSection)
+      ? buildShortPrompt(repoName, repoUrl, packed, metaSection, previousContext, extraSection, mascotScene)
+      : buildDocPrompt(repoName, repoUrl, packed, dur, isHeyGen, metaSection, previousContext, extraSection, mascotScene)
 
     const text = await generateText({
       prompt,
@@ -174,7 +183,7 @@ export async function POST(req: Request) {
       const parts = text.split(/---THUMBNAIL PROMPT---/)
       const shortBrief = (parts[0] || '').replace('---NOTEBOOKLM SHORT BRIEF---', '').trim()
       const thumbnailPrompt = (parts[1] || '').trim()
-      return NextResponse.json({ shortBrief, thumbnailPrompt })
+      return NextResponse.json({ shortBrief, thumbnailPrompt, mascotScene: mascotScene || null })
     }
 
     const parts = text.split(/---YOUTUBE DESCRIPTION---|---THUMBNAIL PROMPT---/)
@@ -182,7 +191,12 @@ export async function POST(req: Request) {
     const youtubeDesc = ensureOfficialLinks((parts[1] || '').trim())
     const thumbnailPrompt = (parts[2] || '').trim()
 
-    return NextResponse.json({ notebookDoc, youtubeDesc, thumbnailPrompt })
+    return NextResponse.json({
+      notebookDoc,
+      youtubeDesc,
+      thumbnailPrompt,
+      mascotScene: mascotScene || null,
+    })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
