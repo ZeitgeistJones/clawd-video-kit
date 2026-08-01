@@ -231,3 +231,60 @@ Always end with the full disclaimer sequence: not officially affiliated, not fin
 Tone: cool, personable, genuinely engaged — no try-hard slang. Credit builds to clawdbotatg, not Austin.
 
 Optional: if NotebookLM suggests focus buttons, pick whichever fits the repo topic best, or skip all of them.`
+
+/**
+ * NotebookLM Cinematic Video Overview — format-specific notes.
+ * Cinematic has no separate Visual Style picker; style + narrative go in the customize / steering box.
+ */
+export const CINEMATIC_PRODUCTION_NOTES = `
+== NOTEBOOKLM CINEMATIC VIDEO OVERVIEW ==
+
+TARGET PRODUCT
+- NotebookLM Studio → Video Overview → Format: Cinematic (English only)
+- Cinematic uses generative visuals + storytelling (not Explainer slide decks / Whiteboard presets)
+- There is NO separate Visual Style carousel for Cinematic — put look + story direction in the customize / steering prompt
+
+SOURCE DOC RULES
+- Write a flowing source narrative NotebookLM can film, not a teleprompter script and not labeled chapters
+- Prefer concrete visualizable moments: what we see, what changes, what the agent builds, what the viewer should feel
+- Still Clawd Explains voice: cool, easygoing, specific — no Gen Z slang, no corporate AI slop
+- Credit builds to clawdbotatg; Austin is kill switch only if natural
+- Close with the mandatory disclaimer sequence
+
+CINEMATIC CUSTOMIZE BOX (steering)
+- One paste-ready director brief for "How would you like the video to be customized?" / custom topic
+- Must explicitly say: Format intent = Cinematic immersive video (not Explainer, not Short)
+- Include: narrative angle, what to emphasize vs skip, visual language (palette, motion, metaphor), pacing/runtime, tone
+- Ask for fluid scenes and visual metaphors over bullet slides or talking-head graphics
+- Keep under ~350 words so it fits the customize field comfortably
+`.trim()
+
+export type CinematicPackageFields = {
+  steeringPrompt: string
+  sourceEmphasis: string
+  visualStyleGuidance: string
+  runtimeScope: string
+  sceneFocusNotes: string
+}
+
+/** One paste for NotebookLM Cinematic customize — style has no separate picker. */
+export function buildCinematicCustomizePaste(fields: CinematicPackageFields): string {
+  return [
+    'FORMAT: Cinematic Video Overview (English). Immersive generative visuals + storytelling — not Explainer slides, not Short.',
+    '',
+    'STEERING / NARRATIVE',
+    fields.steeringPrompt.trim(),
+    '',
+    'EMPHASIZE / DE-EMPHASIZE',
+    fields.sourceEmphasis.trim(),
+    '',
+    'VISUAL LANGUAGE (bake into direction — Cinematic has no style carousel)',
+    fields.visualStyleGuidance.trim(),
+    '',
+    'RUNTIME & SCOPE',
+    fields.runtimeScope.trim(),
+    '',
+    'SCENE BEATS (molding notes, not a timed edit)',
+    fields.sceneFocusNotes.trim(),
+  ].join('\n')
+}

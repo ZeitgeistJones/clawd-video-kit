@@ -9,9 +9,10 @@ Private video production tool for the Clawd Explains YouTube channel.
 - Gap analysis: finds uncovered + stale repos (local name matching — no LLM quota)
 - Repomixes selected repo server-side
 - Generates NotebookLM source doc + YouTube description via Gemini
+- **Cinematic lane** — dedicated package for NotebookLM Cinematic Video Overview (customize paste, visual style, scene beats)
 - `/larva-video` — larv.ai forum post → video pack
 - `/x-video` — X post/article URL + optional author context → video pack
-- Storyboard pre-production — keywords, scene board, Pexels/Pixabay B-roll matches, SRT export
+- Draft lane — storyboard, B-roll, strip audio from NotebookLM MP4, Remotion still draft
 
 Gap **rescan** only needs `GITHUB_TOKEN` + `YOUTUBE_API_KEY`. Gemini/Anthropic are only used when you generate docs, storyboards, keywords, etc.
 
@@ -57,6 +58,16 @@ Compact aliases also work (`GITHUBTOKEN`, `YOUTUBEAPIKEY`, `POSTGRESURL`, etc.).
 | PIXABAY_API_KEY | pixabay.com/api/docs |
 | SCORE_BROLL_MOCK | `true` (default) = local scoring; `false` = Gemini relevance scoring |
 | BLOB_READ_WRITE_TOKEN | Vercel Blob (optional — otherwise drafts/audio save under `tmp/` locally) |
+
+## Lanes
+
+| Lane | Generate API | NotebookLM use |
+|------|----------------|----------------|
+| Classic | `/api/generate` | Source doc + custom focus → Audio Overview |
+| Cinematic | `/api/generate-cinematic` | Source doc + **cinematic customize paste** → Video Overview → Cinematic |
+| Draft | `/api/generate` then storyboard/render | Optional NLM MP4 for narration audio only |
+
+Cinematic has no Visual Style carousel in NotebookLM — style + narrative go in the customize / steering box. The kit’s **cinematic customize paste** is built for that.
 
 ## Storyboard (faceless pre-production)
 

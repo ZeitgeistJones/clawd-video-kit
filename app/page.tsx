@@ -5,7 +5,7 @@ import GapReport from '@/components/GapReport'
 import GeneratePanel from '@/components/GeneratePanel'
 import OutputPanel from '@/components/OutputPanel'
 import DraftHistory from '@/components/DraftHistory'
-import type { Duration, GenerationOutputs } from '@/types/generate'
+import type { Duration, GenerationOutputs, WorkflowLane } from '@/types/generate'
 
 export type GapEntry = {
   repoName: string
@@ -41,6 +41,7 @@ export default function Home() {
   const [loadingGaps, setLoadingGaps] = useState(false)
   const [lastScanned, setLastScanned] = useState<string | null>(null)
   const [selectedRepo, setSelectedRepo] = useState<string>('')
+  const [lane, setLane] = useState<WorkflowLane>('classic')
   const [duration, setDuration] = useState<Duration>('full')
   const [isHeyGen, setIsHeyGen] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -69,6 +70,11 @@ export default function Home() {
         setOutput(cache)
         setDuration(cache.duration || 'full')
         setIsHeyGen(cache.isHeyGen || false)
+        if (cache.lane === 'cinematic' || cache.cinematicCustomizePaste) {
+          setLane('cinematic')
+        } else if (cache.lane === 'classic' || cache.lane === 'draft') {
+          setLane(cache.lane === 'draft' ? 'draft' : 'classic')
+        }
       } else {
         setOutput(null)
       }
@@ -145,6 +151,7 @@ export default function Home() {
 
   async function generate(opts: {
     repoName: string
+    lane: WorkflowLane
     includeMetaHook: boolean
     previousVideoDescription: string
     generatePfp: boolean
@@ -166,7 +173,8 @@ export default function Home() {
       const { packed, repoUrl, error: packErr } = await packRes.json()
       if (packErr) throw new Error(packErr)
 
-      const genRes = await fetch('/api/generate', {
+      const isCinematic = opts.lane === 'cinematic'
+      const genRes = await fetch(isCinematic ? '/api/generate-cinematic' : '/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -176,10 +184,9 @@ export default function Home() {
           includeMetaHook: opts.includeMetaHook,
           previousVideoDescription: opts.previousVideoDescription,
           extraContext: opts.extraContext,
-          duration: opts.duration,
-          isHeyGen: opts.isHeyGen,
-          // Lock thumbnail to the LeftClaw scene when generating a new PFP,
-          // or reuse an existing PFP scene on regenerate-without-pfp.
+          ...(isCinematic
+            ? {}
+            : { duration: opts.duration, isHeyGen: opts.isHeyGen }),
           lockMascot: opts.generatePfp,
           mascotScene: opts.generatePfp ? undefined : output?.pfpPrompt,
         }),
@@ -187,7 +194,19 @@ export default function Home() {
       const genData = await genRes.json()
       if (genData.error) throw new Error(genData.error)
 
-      const { shortBrief, notebookDoc, youtubeDesc, thumbnailPrompt, mascotScene } = genData
+      const {
+        shortBrief,
+        notebookDoc,
+        youtubeDesc,
+        thumbnailPrompt,
+        mascotScene,
+        steeringPrompt,
+        sourceEmphasis,
+        visualStyleGuidance,
+        runtimeScope,
+        sceneFocusNotes,
+        cinematicCustomizePaste,
+      } = genData
       const generatedAt = new Date().toISOString()
 
       let pfpImage: string | undefined
@@ -211,25 +230,37 @@ export default function Home() {
           setError('PFP generation failed: ' + pfpData.error)
         }
       } else if (output?.pfpImage && output?.pfpPrompt) {
-        // Keep previous mascot when regenerating docs without a new PFP burn
         pfpImage = output.pfpImage
         pfpPrompt = output.pfpPrompt
       }
 
       const cachePayload: GenerationOutputs = {
-        duration: opts.duration,
-        isHeyGen: opts.isHeyGen,
+        lane: opts.lane === 'draft' ? 'classic' : opts.lane,
+        duration: isCinematic ? 'full' : opts.duration,
+        isHeyGen: isCinematic ? false : opts.isHeyGen,
         generatedAt,
-        ...(opts.duration === 'short'
-          ? { shortBrief, thumbnailPrompt }
-          : { notebookDoc, youtubeDesc, thumbnailPrompt }),
+        ...(isCinematic
+          ? {
+              notebookDoc,
+              youtubeDesc,
+              thumbnailPrompt,
+              steeringPrompt,
+              sourceEmphasis,
+              visualStyleGuidance,
+              runtimeScope,
+              sceneFocusNotes,
+              cinematicCustomizePaste,
+            }
+          : opts.duration === 'short'
+            ? { shortBrief, thumbnailPrompt }
+            : { notebookDoc, youtubeDesc, thumbnailPrompt }),
       }
 
       const newOutput: OutputState = { ...cachePayload, pfpImage, pfpPrompt }
       setOutput(newOutput)
       await saveGenerationCache(opts.repoName, cachePayload)
 
-      if (opts.duration !== 'short' && notebookDoc && youtubeDesc) {
+      if ((isCinematic || opts.duration !== 'short') && notebookDoc && youtubeDesc) {
         const draft: Draft = {
           repoName: opts.repoName,
           notebookDoc,
@@ -305,6 +336,8 @@ export default function Home() {
         <GeneratePanel
           selectedRepo={selectedRepo}
           onRepoChange={setSelectedRepo}
+          lane={lane}
+          onLaneChange={setLane}
           duration={duration}
           onDurationChange={setDuration}
           isHeyGen={isHeyGen}
@@ -316,12 +349,20 @@ export default function Home() {
 
         {output && (
           <OutputPanel
+            lane={output.lane || lane}
+            showDraftPipeline={lane === 'draft'}
             duration={output.duration}
             isHeyGen={output.isHeyGen}
             shortBrief={output.shortBrief}
             notebookDoc={output.notebookDoc}
             youtubeDesc={output.youtubeDesc}
             thumbnailPrompt={output.thumbnailPrompt}
+            cinematicCustomizePaste={output.cinematicCustomizePaste}
+            steeringPrompt={output.steeringPrompt}
+            sourceEmphasis={output.sourceEmphasis}
+            visualStyleGuidance={output.visualStyleGuidance}
+            runtimeScope={output.runtimeScope}
+            sceneFocusNotes={output.sceneFocusNotes}
             pfpImage={output.pfpImage}
             pfpPrompt={output.pfpPrompt}
             repoName={selectedRepo}

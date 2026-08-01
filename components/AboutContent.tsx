@@ -10,10 +10,18 @@ export default function AboutContent() {
     {
       title: 'Workflow',
       items: [
-        'Scan gaps → pick a repo → generate → copy outputs into NotebookLM → generate audio overview.',
-        'Use the custom focus block for NotebookLM steering (duration, tone, structure).',
-        'larva — paste a larv.ai forum URL for community-thread videos.',
-        'x — paste an X post/article URL; optionally paste author notes from X\'s summary profile tool.',
+        'Three lanes: Classic (NLM audio/doc), Cinematic (NLM Cinematic Video Overview), Draft (storyboard → strip MP4 audio → Remotion).',
+        'Classic: scan → pick repo → generate → copy source + custom focus into NotebookLM audio overview.',
+        'Cinematic: generate cinematic package → paste source doc → paste cinematic customize into Studio → Video Overview → Cinematic.',
+        'larva / x — separate pages for forum and X write-up packs.',
+      ],
+    },
+    {
+      title: 'Cinematic package',
+      items: [
+        'Cinematic customize paste — one block for NLM steering (style + narrative; Cinematic has no style carousel).',
+        'Also: cinematic source doc, steering-only, source emphasis, visual style, runtime/scope, scene focus notes.',
+        'YouTube description + thumbnail still included for publish.',
       ],
     },
     {
@@ -33,12 +41,11 @@ export default function AboutContent() {
       ],
     },
     {
-      title: 'Storyboard + b-roll + draft',
+      title: 'Draft lane',
       items: [
-        'Optional: Script → Storyboard → B-roll → Captions → Draft.',
-        'Generate storyboard auto-scores stock; review needs-review scenes; swap thumbs as needed.',
-        'Draft: upload NotebookLM’s video export (MP4). The kit strips the audio — no share-URL paste.',
-        'LeftClaw PFP/thumbnail flow unchanged under Script.',
+        'Switch lane to Draft → generate script → Storyboard → B-roll → Captions → upload NotebookLM MP4 → render.',
+        'MP4 upload strips audio via ffmpeg — no share-URL paste.',
+        'LeftClaw PFP available on Classic / Cinematic lanes.',
       ],
     },
     {

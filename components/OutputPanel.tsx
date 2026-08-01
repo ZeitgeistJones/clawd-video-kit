@@ -2,18 +2,26 @@
 
 import { useState } from 'react'
 import { NOTEBOOKLM_SHORT_FOCUS, NOTEBOOKLM_FULL_FOCUS, NOTEBOOKLM_MEDIUM_FOCUS } from '@/data/style-bible'
-import type { Duration } from '@/types/generate'
+import type { Duration, WorkflowLane } from '@/types/generate'
 import type { ScoredScene } from '@/types/storyboard'
 import StoryboardPanel from '@/components/StoryboardPanel'
 import DraftVideoPanel from '@/components/DraftVideoPanel'
 
 type Props = {
+  lane?: WorkflowLane
+  showDraftPipeline?: boolean
   duration?: Duration
   isHeyGen?: boolean
   shortBrief?: string
   notebookDoc?: string
   youtubeDesc?: string
   thumbnailPrompt?: string
+  cinematicCustomizePaste?: string
+  steeringPrompt?: string
+  sourceEmphasis?: string
+  visualStyleGuidance?: string
+  runtimeScope?: string
+  sceneFocusNotes?: string
   pfpImage?: string
   pfpPrompt?: string
   repoName: string
@@ -117,12 +125,20 @@ function docNote(duration?: Duration, isHeyGen?: boolean) {
 }
 
 export default function OutputPanel({
+  lane,
+  showDraftPipeline = false,
   duration,
   isHeyGen,
   shortBrief,
   notebookDoc,
   youtubeDesc,
   thumbnailPrompt,
+  cinematicCustomizePaste,
+  steeringPrompt,
+  sourceEmphasis,
+  visualStyleGuidance,
+  runtimeScope,
+  sceneFocusNotes,
   pfpImage,
   pfpPrompt,
   repoName,
@@ -131,6 +147,7 @@ export default function OutputPanel({
   const [videoUrl, setVideoUrl] = useState('')
   const [marked, setMarked] = useState(false)
   const [scoredScenes, setScoredScenes] = useState<ScoredScene[] | null>(null)
+  const isCinematic = lane === 'cinematic' || Boolean(cinematicCustomizePaste)
 
   function handleMark() {
     onMarkCovered(repoName, videoUrl)
@@ -150,10 +167,12 @@ export default function OutputPanel({
       <SectionHeader
         id="script-section"
         title="1 · script"
-        hint="NotebookLM doc, description, focus, thumbnail / mascot"
+        hint={isCinematic
+          ? 'Cinematic source + NLM customize paste + publish assets'
+          : 'NotebookLM doc, description, focus, thumbnail / mascot'}
       />
 
-      {duration === 'short' ? (
+      {duration === 'short' && !isCinematic ? (
         shortBrief && (
           <CopyBlock
             label="notebooklm short brief"
@@ -165,20 +184,61 @@ export default function OutputPanel({
         <>
           {notebookDoc && (
             <CopyBlock
-              label="notebooklm source doc"
+              label={isCinematic ? 'cinematic source doc' : 'notebooklm source doc'}
               content={notebookDoc}
-              note={docNote(duration, isHeyGen)}
+              note={isCinematic
+                ? 'paste as NotebookLM source — visual-beat friendly for Cinematic'
+                : docNote(duration, isHeyGen)}
             />
           )}
           {youtubeDesc && <CopyBlock label="youtube description" content={youtubeDesc} />}
         </>
       )}
 
-      <CopyBlock
-        label="notebooklm custom focus"
-        content={notebookFocusForDuration(duration)}
-        note="paste into NotebookLM's custom topic box when generating audio"
-      />
+      {isCinematic ? (
+        <>
+          {cinematicCustomizePaste && (
+            <CopyBlock
+              label="cinematic customize paste"
+              content={cinematicCustomizePaste}
+              note="Studio → Video Overview → Cinematic → paste into customize / steering (style is in here — no carousel)"
+            />
+          )}
+          {steeringPrompt && (
+            <CopyBlock
+              label="steering only"
+              content={steeringPrompt}
+              note="shorter — narrative angle alone if the full paste is too long"
+            />
+          )}
+          {sourceEmphasis && (
+            <CopyBlock label="source emphasis" content={sourceEmphasis} note="what to stress vs skip" />
+          )}
+          {visualStyleGuidance && (
+            <CopyBlock
+              label="visual style guidance"
+              content={visualStyleGuidance}
+              note="baked into customize paste — Cinematic has no style picker"
+            />
+          )}
+          {runtimeScope && (
+            <CopyBlock label="runtime / scope" content={runtimeScope} />
+          )}
+          {sceneFocusNotes && (
+            <CopyBlock
+              label="scene focus notes"
+              content={sceneFocusNotes}
+              note="molding beats — not a timed edit"
+            />
+          )}
+        </>
+      ) : (
+        <CopyBlock
+          label="notebooklm custom focus"
+          content={notebookFocusForDuration(duration)}
+          note="paste into NotebookLM's custom topic box when generating audio"
+        />
+      )}
 
       {thumbnailPrompt && (
         <CopyBlock
@@ -244,36 +304,40 @@ export default function OutputPanel({
         </div>
       )}
 
-      <StoryboardPanel
-        text={duration === 'short' ? (shortBrief || '') : (notebookDoc || '')}
-        repoName={repoName}
-        duration={duration || 'full'}
-        onPipelineChange={({ scoredScenes: next }) => setScoredScenes(next)}
-      />
+      {showDraftPipeline && (
+        <>
+          <StoryboardPanel
+            text={duration === 'short' ? (shortBrief || '') : (notebookDoc || '')}
+            repoName={repoName}
+            duration={duration || 'full'}
+            onPipelineChange={({ scoredScenes: next }) => setScoredScenes(next)}
+          />
 
-      <SectionHeader
-        id="upload-section"
-        title="5 · narration"
-        hint="NotebookLM video export — audio stripped automatically"
-      />
-      <div style={{
-        background: 'var(--surface)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius)',
-        padding: 14,
-        fontSize: 12,
-        color: 'var(--text-dim)',
-      }}>
-        Download the video from NotebookLM (not a share URL), then upload the MP4 in{' '}
-        <strong style={{ color: 'var(--text-muted)' }}>6 · draft video</strong>. We strip the audio track for the draft.
-      </div>
+          <SectionHeader
+            id="upload-section"
+            title="5 · narration"
+            hint="NotebookLM video export — audio stripped automatically"
+          />
+          <div style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)',
+            padding: 14,
+            fontSize: 12,
+            color: 'var(--text-dim)',
+          }}>
+            Download the video from NotebookLM (not a share URL), then upload the MP4 in{' '}
+            <strong style={{ color: 'var(--text-muted)' }}>6 · draft video</strong>. We strip the audio track for the draft.
+          </div>
 
-      <SectionHeader
-        id="draft-section"
-        title="6 · draft video"
-        hint="MP4 in → audio strip → Remotion still draft"
-      />
-      <DraftVideoPanel scenes={scoredScenes} repoName={repoName} />
+          <SectionHeader
+            id="draft-section"
+            title="6 · draft video"
+            hint="MP4 in → audio strip → Remotion still draft"
+          />
+          <DraftVideoPanel scenes={scoredScenes} repoName={repoName} />
+        </>
+      )}
 
       <div style={{
         background: 'var(--surface)',

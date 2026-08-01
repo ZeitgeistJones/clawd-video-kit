@@ -1,17 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import type { Duration } from '@/types/generate'
+import type { Duration, WorkflowLane } from '@/types/generate'
 
 type Props = {
   selectedRepo: string
   onRepoChange: (repo: string) => void
+  lane: WorkflowLane
+  onLaneChange: (lane: WorkflowLane) => void
   duration: Duration
   onDurationChange: (duration: Duration) => void
   isHeyGen: boolean
   onHeyGenChange: (isHeyGen: boolean) => void
   onGenerate: (opts: {
     repoName: string
+    lane: WorkflowLane
     includeMetaHook: boolean
     previousVideoDescription: string
     generatePfp: boolean
@@ -24,14 +27,22 @@ type Props = {
   hasOutput: boolean
 }
 
+const LANE_OPTIONS: { value: WorkflowLane; label: string; hint: string }[] = [
+  { value: 'classic', label: 'Classic', hint: 'NLM audio / doc' },
+  { value: 'cinematic', label: 'Cinematic', hint: 'NLM video overview' },
+  { value: 'draft', label: 'Draft', hint: 'storyboard + render' },
+]
+
 const DURATION_OPTIONS: { value: Duration; label: string; hint: string }[] = [
   { value: 'full', label: 'Full', hint: '5–6 min' },
   { value: 'medium', label: 'Medium', hint: '2–3 min' },
   { value: 'short', label: 'Short', hint: '30–45 sec' },
 ]
 
-function generateButtonLabel(duration: Duration, generating: boolean) {
+function generateButtonLabel(lane: WorkflowLane, duration: Duration, generating: boolean) {
   if (generating) return 'generating...'
+  if (lane === 'cinematic') return '⚡ generate cinematic package'
+  if (lane === 'draft') return '⚡ generate script for draft'
   if (duration === 'short') return '⚡ generate short brief'
   if (duration === 'medium') return '⚡ generate medium doc'
   return '⚡ generate doc + description'
@@ -40,6 +51,8 @@ function generateButtonLabel(duration: Duration, generating: boolean) {
 export default function GeneratePanel({
   selectedRepo,
   onRepoChange,
+  lane,
+  onLaneChange,
   duration,
   onDurationChange,
   isHeyGen,
@@ -57,12 +70,13 @@ export default function GeneratePanel({
   function buildOpts(forceRegenerate?: boolean) {
     return {
       repoName: selectedRepo.trim(),
+      lane,
       includeMetaHook,
       previousVideoDescription,
-      generatePfp,
+      generatePfp: lane === 'draft' ? false : generatePfp,
       extraContext,
-      duration,
-      isHeyGen: duration === 'short' ? false : isHeyGen,
+      duration: lane === 'cinematic' ? 'full' as Duration : duration,
+      isHeyGen: lane !== 'classic' || duration === 'short' ? false : isHeyGen,
       forceRegenerate,
     }
   }
@@ -89,6 +103,47 @@ export default function GeneratePanel({
       </div>
 
       <div style={{ marginBottom: 14 }}>
+        <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>
+          lane
+        </label>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {LANE_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onLaneChange(opt.value)}
+              style={{
+                flex: 1,
+                background: lane === opt.value ? 'var(--accent-dim)' : 'var(--surface-2)',
+                color: lane === opt.value ? 'var(--accent)' : 'var(--text-muted)',
+                border: `1px solid ${lane === opt.value ? 'var(--accent)' : 'var(--border-strong)'}`,
+                borderRadius: 'var(--radius)',
+                padding: '8px 6px',
+                fontSize: 11,
+                cursor: 'pointer',
+                fontFamily: 'var(--font)',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontWeight: 600 }}>{opt.label}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 2 }}>{opt.hint}</div>
+            </button>
+          ))}
+        </div>
+        {lane === 'cinematic' && (
+          <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 8, lineHeight: 1.5 }}>
+            Tuned for NotebookLM → Video Overview → <strong style={{ color: 'var(--text-muted)' }}>Cinematic</strong>.
+            Copy the cinematic customize paste into NLM&apos;s steering box (style lives there — no carousel).
+          </div>
+        )}
+        {lane === 'draft' && (
+          <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 8, lineHeight: 1.5 }}>
+            Generates a classic script, then use storyboard → b-roll → upload NotebookLM MP4 → render.
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginBottom: 14 }}>
         <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
           repo name
         </label>
@@ -110,38 +165,40 @@ export default function GeneratePanel({
         />
       </div>
 
-      <div style={{ marginBottom: 14 }}>
-        <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>
-          duration
-        </label>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {DURATION_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => {
-                onDurationChange(opt.value)
-                if (opt.value === 'short') onHeyGenChange(false)
-              }}
-              style={{
-                flex: 1,
-                background: duration === opt.value ? 'var(--accent-dim)' : 'var(--surface-2)',
-                color: duration === opt.value ? 'var(--accent)' : 'var(--text-muted)',
-                border: `1px solid ${duration === opt.value ? 'var(--accent)' : 'var(--border-strong)'}`,
-                borderRadius: 'var(--radius)',
-                padding: '8px 6px',
-                fontSize: 11,
-                cursor: 'pointer',
-                fontFamily: 'var(--font)',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontWeight: 600 }}>{opt.label}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 2 }}>{opt.hint}</div>
-            </button>
-          ))}
+      {lane === 'classic' && (
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>
+            duration
+          </label>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {DURATION_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onDurationChange(opt.value)
+                  if (opt.value === 'short') onHeyGenChange(false)
+                }}
+                style={{
+                  flex: 1,
+                  background: duration === opt.value ? 'var(--accent-dim)' : 'var(--surface-2)',
+                  color: duration === opt.value ? 'var(--accent)' : 'var(--text-muted)',
+                  border: `1px solid ${duration === opt.value ? 'var(--accent)' : 'var(--border-strong)'}`,
+                  borderRadius: 'var(--radius)',
+                  padding: '8px 6px',
+                  fontSize: 11,
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font)',
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontWeight: 600 }}>{opt.label}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 2 }}>{opt.hint}</div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div style={{ marginBottom: 14 }}>
         <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
@@ -168,6 +225,7 @@ export default function GeneratePanel({
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+        {lane === 'classic' && (
         <label style={{
           display: 'flex', alignItems: 'center', gap: 10,
           cursor: duration === 'short' ? 'not-allowed' : 'pointer',
@@ -184,6 +242,7 @@ export default function GeneratePanel({
             HeyGen mode <span style={{ color: 'var(--text-dim)' }}>(single presenter, teleprompter style)</span>
           </span>
         </label>
+        )}
 
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
           <input
@@ -209,6 +268,7 @@ export default function GeneratePanel({
           </span>
         </label>
 
+        {lane !== 'draft' && (
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
           <input
             type="checkbox"
@@ -220,6 +280,7 @@ export default function GeneratePanel({
             generate LeftClaw mascot <span style={{ color: 'var(--text-dim)' }}>(burns 1000 CLAWD · locks thumbnail)</span>
           </span>
         </label>
+        )}
       </div>
 
       {showPrevious && (
@@ -263,7 +324,7 @@ export default function GeneratePanel({
             opacity: !selectedRepo.trim() ? 0.4 : 1,
           }}
         >
-          {generateButtonLabel(duration, generating)}
+          {generateButtonLabel(lane, duration, generating)}
         </button>
         {hasOutput && (
           <button
@@ -285,7 +346,7 @@ export default function GeneratePanel({
             regenerate
           </button>
         )}
-        {hasOutput && (
+        {hasOutput && lane === 'draft' && (
           <button
             type="button"
             onClick={() => {
