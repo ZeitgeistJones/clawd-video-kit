@@ -108,15 +108,16 @@ export default function Home() {
     } catch {}
   }
 
-  async function runGapAnalysis(force = false) {
+  async function runGapAnalysis(_force = false) {
     setLoadingGaps(true)
     setError('')
     try {
-      const reposRes = await fetch('/api/repos')
+      // Always bypass Next/GitHub caches on explicit scan/rescan so new repos show up.
+      const reposRes = await fetch('/api/repos?fresh=1', { cache: 'no-store' })
       const reposData = await reposRes.json()
       if (!reposData.repos) throw new Error('Repos error: ' + JSON.stringify(reposData))
 
-      const videosRes = await fetch('/api/videos')
+      const videosRes = await fetch('/api/videos?fresh=1', { cache: 'no-store' })
       const videosData = await videosRes.json()
       if (!videosData.videos) throw new Error('Videos error: ' + JSON.stringify(videosData))
 
