@@ -9,8 +9,12 @@ import {
   CINEMATIC_EMPHASIS_RULES,
   CINEMATIC_HOLDER_THESIS_RULES,
   buildCinematicCustomizePaste,
+  buildElevenLabsScriptSection,
 } from '@/data/style-bible'
-import { buildNormieVoiceBlockWithNoSlang } from '@/data/normieVoice'
+import {
+  buildElevenLabsVoiceBlock,
+  buildNormieVoiceBlockWithNoSlang,
+} from '@/data/normieVoice'
 import { generateText } from '@/lib/llm'
 import {
   generateMascotScene,
@@ -105,6 +109,8 @@ No markdown headers inside this section. Short lines or short paragraphs OK.
 ---FEEL NOTES---
 2–4 everyday visual feel lines for Cinematic (under 60 words). Dark, clear, modern, simple motion. Ban hex codes, glassmorphism, neon crypto spam, slide decks, talking-head stock. No architecture metaphors that require knowing code.
 
+${buildElevenLabsScriptSection('full', buildElevenLabsVoiceBlock())}
+
 ---YOUTUBE DESCRIPTION---
 Enthusiastic community voice. 2–3 sentence summary, repo URL ${repoUrl}, then paste this OFFICIAL LINKS block EXACTLY:
 
@@ -123,13 +129,14 @@ Return every section with its ---HEADER--- exactly as specified.`
 
     const text = await generateText({
       prompt,
-      maxOutputTokens: 6000,
+      maxOutputTokens: 7000,
     })
 
     const emphasisSource = section(text, '---EMPHASIS SOURCE---', '---HOLDER THESIS SOURCE---')
     const holderThesisSource = section(text, '---HOLDER THESIS SOURCE---', '---FOCUS GUIDANCE---')
     const focusGuidance = section(text, '---FOCUS GUIDANCE---', '---FEEL NOTES---')
-    const feelNotes = section(text, '---FEEL NOTES---', '---YOUTUBE DESCRIPTION---')
+    const feelNotes = section(text, '---FEEL NOTES---', '---ELEVENLABS SCRIPT---')
+    const elevenLabsScript = section(text, '---ELEVENLABS SCRIPT---', '---YOUTUBE DESCRIPTION---')
     const youtubeDesc = ensureOfficialLinks(
       section(text, '---YOUTUBE DESCRIPTION---', '---THUMBNAIL PROMPT---'),
     )
@@ -162,6 +169,7 @@ Return every section with its ---HEADER--- exactly as specified.`
       feelNotes,
       narratorBlock,
       cinematicCustomizePaste,
+      elevenLabsScript,
       youtubeDesc,
       thumbnailPrompt,
       mascotScene: mascotScene || null,

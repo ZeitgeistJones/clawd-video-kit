@@ -18,6 +18,7 @@ type Props = {
   holderThesisSource?: string
   packedRepo?: string
   youtubeDesc?: string
+  elevenLabsScript?: string
   thumbnailPrompt?: string
   cinematicCustomizePaste?: string
   narratorBlock?: string
@@ -178,6 +179,7 @@ export default function OutputPanel({
   holderThesisSource,
   packedRepo,
   youtubeDesc,
+  elevenLabsScript,
   thumbnailPrompt,
   cinematicCustomizePaste,
   narratorBlock,
@@ -213,8 +215,8 @@ export default function OutputPanel({
         id="script-section"
         title="1 · script"
         hint={isCinematic
-          ? 'Sources: repo pack + emphasis + holder thesis → normie customize paste → publish'
-          : 'NotebookLM doc, description, focus, thumbnail / mascot'}
+          ? 'Sources: repo pack + emphasis + holder thesis → normie customize + ElevenLabs script → publish'
+          : 'NotebookLM doc, ElevenLabs script, description, focus, thumbnail / mascot'}
       />
 
       {isCinematic && (
@@ -283,16 +285,34 @@ export default function OutputPanel({
           {feelNotes && (
             <CopyBlock label="feel" content={feelNotes} note="light visual mood — not tech direction" />
           )}
+          {elevenLabsScript && (
+            <CopyBlock
+              label="elevenlabs script"
+              content={elevenLabsScript}
+              note="plain spoken script — clear like a sharp kid could follow, no baby talk"
+              downloadName={`elevenlabs-${repoName || 'repo'}.txt`}
+            />
+          )}
           {youtubeDesc && <CopyBlock label="youtube description" content={youtubeDesc} />}
         </>
       ) : duration === 'short' ? (
-        shortBrief && (
-          <CopyBlock
-            label="notebooklm short brief"
-            content={shortBrief}
-            note="targets 30–45 seconds"
-          />
-        )
+        <>
+          {shortBrief && (
+            <CopyBlock
+              label="notebooklm short brief"
+              content={shortBrief}
+              note="targets 30–45 seconds"
+            />
+          )}
+          {elevenLabsScript && (
+            <CopyBlock
+              label="elevenlabs script"
+              content={elevenLabsScript}
+              note="~30–45s spoken — paste into ElevenLabs"
+              downloadName={`elevenlabs-${repoName || 'repo'}.txt`}
+            />
+          )}
+        </>
       ) : (
         <>
           {notebookDoc && (
@@ -300,6 +320,14 @@ export default function OutputPanel({
               label="notebooklm source doc"
               content={notebookDoc}
               note={docNote(duration, isHeyGen)}
+            />
+          )}
+          {elevenLabsScript && (
+            <CopyBlock
+              label="elevenlabs script"
+              content={elevenLabsScript}
+              note="plain spoken script — clear like a sharp kid could follow, no baby talk"
+              downloadName={`elevenlabs-${repoName || 'repo'}.txt`}
             />
           )}
           {youtubeDesc && <CopyBlock label="youtube description" content={youtubeDesc} />}

@@ -8,7 +8,9 @@ import {
   THUMBNAIL_CREATIVE_NOTES,
   OFFICIAL_LINKS_BLOCK,
   ensureOfficialLinks,
+  buildElevenLabsScriptSection,
 } from '@/data/style-bible'
+import { buildElevenLabsVoiceBlock } from '@/data/normieVoice'
 import { generateText } from '@/lib/llm'
 import {
   generateMascotScene,
@@ -16,6 +18,10 @@ import {
   thumbnailMascotOpenNotes,
 } from '@/lib/mascot-scene'
 import type { Duration } from '@/types/generate'
+
+function elevenLabsScriptSection(kind: 'full' | 'medium' | 'short') {
+  return buildElevenLabsScriptSection(kind, buildElevenLabsVoiceBlock())
+}
 
 export const maxDuration = 60
 
@@ -59,6 +65,8 @@ The narrative must naturally weave in these beats (without labeling them):
 
 Tone throughout: cool and easygoing. Casual conversational English — no "cap", "ngl", "lowkey", "bruh", or other Gen Z slang. Genuinely interested. Personable and specific — never sterile, never try-hard, never generic AI slop.
 
+${elevenLabsScriptSection(duration)}
+
 ---YOUTUBE DESCRIPTION---
 A YouTube video description in the voice of an enthusiastic, relatable clawd community member — not generic marketing copy. Include:
 - 2-3 sentence summary of what the video covers
@@ -91,16 +99,18 @@ ${SHORT_BRIEF_NOTES}${metaSection}${previousContext}${extraSection}
 Here is the packed repo content:
 ${packed}
 
-Generate TWO outputs:
+Generate THREE outputs:
 
 ---NOTEBOOKLM SHORT BRIEF---
 Write ONE flowing punchy paragraph for NotebookLM to riff on in under 45 seconds. No chapter headers, no labeled sections, no disclaimer. Audience is normies who don't know clawd — write plain english anyone can follow. You may briefly mention "an AI agent named clawdbotatg" but don't explain the ecosystem. Hook in the first sentence, explain what the repo does in one understandable line, say why it's wild or impressive in one line, and close with energy that makes viewers want to click the channel to learn more.
 
 Sound human and personable — genuinely interested in this specific repo. Funny and relatable only when it comes naturally. No Gen Z slang, no forced jokes or analogies. NOT a presenter, NOT generic AI hype.
 
+${elevenLabsScriptSection('short')}
+
 ${buildThumbnailSection('9:16', mascotScene)}
 
-Return both sections clearly separated by the ---NOTEBOOKLM SHORT BRIEF--- and ---THUMBNAIL PROMPT--- headers.`
+Return all sections clearly separated by the ---NOTEBOOKLM SHORT BRIEF---, ---ELEVENLABS SCRIPT---, and ---THUMBNAIL PROMPT--- headers.`
 }
 
 function buildDocPrompt(
@@ -117,7 +127,7 @@ function buildDocPrompt(
   const durationNotes = duration === 'medium' ? `\n\n${MEDIUM_BRIEF_NOTES}` : ''
   const docSection = buildDocSection(isHeyGen, duration, mascotScene).replace('{repoUrl}', repoUrl)
 
-  return `You are generating a NotebookLM source document, a YouTube description, and a thumbnail prompt for a video about the clawdbotatg GitHub repo: ${repoName} (${repoUrl}).
+  return `You are generating a NotebookLM source document, an ElevenLabs spoken script, a YouTube description, and a thumbnail prompt for a video about the clawdbotatg GitHub repo: ${repoName} (${repoUrl}).
 
 IMPORTANT: The project is called "clawd" (rhymes with "clawed"). Never spell it "claude". Never confuse it with Anthropic's Claude AI.
 IMPORTANT: clawdbotatg builds these repos. Austin is the kill switch, not the builder — don't attribute builds to Austin, and don't explain this distinction unless it's naturally relevant.
@@ -127,11 +137,11 @@ ${STYLE_BIBLE}${durationNotes}${metaSection}${previousContext}${extraSection}
 Here is the packed repo content:
 ${packed}
 
-Generate THREE outputs:
+Generate FOUR outputs:
 
 ${docSection}
 
-Return all three sections clearly separated by the ---NOTEBOOKLM DOC---, ---YOUTUBE DESCRIPTION---, and ---THUMBNAIL PROMPT--- headers.`
+Return all sections clearly separated by the ---NOTEBOOKLM DOC---, ---ELEVENLABS SCRIPT---, ---YOUTUBE DESCRIPTION---, and ---THUMBNAIL PROMPT--- headers.`
 }
 
 export async function POST(req: Request) {
@@ -176,23 +186,33 @@ export async function POST(req: Request) {
 
     const text = await generateText({
       prompt,
-      maxOutputTokens: 5000,
+      maxOutputTokens: 6500,
     })
 
     if (dur === 'short') {
-      const parts = text.split(/---THUMBNAIL PROMPT---/)
-      const shortBrief = (parts[0] || '').replace('---NOTEBOOKLM SHORT BRIEF---', '').trim()
-      const thumbnailPrompt = (parts[1] || '').trim()
-      return NextResponse.json({ shortBrief, thumbnailPrompt, mascotScene: mascotScene || null })
+      const chunks = text.split(/---ELEVENLABS SCRIPT---|---THUMBNAIL PROMPT---/)
+      const shortBrief = (chunks[0] || '').replace('---NOTEBOOKLM SHORT BRIEF---', '').trim()
+      const elevenLabsScript = (chunks[1] || '').trim()
+      const thumbnailPrompt = (chunks[2] || '').trim()
+      return NextResponse.json({
+        shortBrief,
+        elevenLabsScript,
+        thumbnailPrompt,
+        mascotScene: mascotScene || null,
+      })
     }
 
-    const parts = text.split(/---YOUTUBE DESCRIPTION---|---THUMBNAIL PROMPT---/)
+    const parts = text.split(
+      /---ELEVENLABS SCRIPT---|---YOUTUBE DESCRIPTION---|---THUMBNAIL PROMPT---/,
+    )
     const notebookDoc = (parts[0] || '').replace('---NOTEBOOKLM DOC---', '').trim()
-    const youtubeDesc = ensureOfficialLinks((parts[1] || '').trim())
-    const thumbnailPrompt = (parts[2] || '').trim()
+    const elevenLabsScript = (parts[1] || '').trim()
+    const youtubeDesc = ensureOfficialLinks((parts[2] || '').trim())
+    const thumbnailPrompt = (parts[3] || '').trim()
 
     return NextResponse.json({
       notebookDoc,
+      elevenLabsScript,
       youtubeDesc,
       thumbnailPrompt,
       mascotScene: mascotScene || null,

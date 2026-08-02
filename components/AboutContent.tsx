@@ -54,6 +54,7 @@ export default function AboutContent() {
       title: 'Outputs',
       items: [
         'NotebookLM source doc / short brief — paste as NotebookLM source.',
+        'ElevenLabs script — spoken-only paste for TTS; plain language (sharp-kid clarity, no baby talk or condescension). Handy for Draft narration too.',
         'NotebookLM custom focus — paste into NotebookLM custom topic box when generating audio.',
         'YouTube description + thumbnail prompt — copy separately. Descriptions always include the canonical OFFICIAL LINKS block (contract, CoinGecko, X, website, Telegram).',
       ],

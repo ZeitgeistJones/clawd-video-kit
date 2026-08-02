@@ -310,3 +310,46 @@ export function buildCinematicCustomizePaste(fields: CinematicPackageFields): st
     fields.feelNotes.trim(),
   ].join('\n')
 }
+
+/** Spoken script for ElevenLabs (or similar TTS) — clear, respectful, read-aloud ready. */
+export const ELEVENLABS_SCRIPT_NOTES = `
+== ELEVENLABS SPOKEN SCRIPT ==
+
+PURPOSE
+- A script meant to be read aloud by ElevenLabs (single narrator TTS)
+- Viewer should feel like they actually understand — plain language, warm, clear
+- Clarity bar: a sharp ~10-year-old could follow the ideas
+- NOT baby talk, NOT kid references, NOT condescending — adults stay respected
+- No Gen Z slang; no corporate hype; no whitepaper voice
+
+FORM
+- One continuous spoken script — no chapter headers, no markdown, no bullet lists
+- Short-to-medium sentences that sound natural when spoken
+- Spell out awkward abbreviations on first use in plain words
+- Include a brief spoken disclaimer close (not affiliated, not financial advice, DYOR) for full/medium length; skip disclaimer for short/teaser length
+- Credit builds to clawdbotatg; Austin only if natural
+`.trim()
+
+/** Prompt section for ---ELEVENLABS SCRIPT--- (Classic + Cinematic). */
+export function buildElevenLabsScriptSection(
+  kind: 'full' | 'medium' | 'short',
+  voiceBlock: string,
+): string {
+  const length =
+    kind === 'short'
+      ? 'Target ~30–45 seconds spoken. No disclaimer.'
+      : kind === 'medium'
+        ? 'Target 2–3 minutes spoken. Include a brief spoken disclaimer at the end.'
+        : 'Target 5–6 minutes spoken. Include a brief spoken disclaimer at the end.'
+
+  return `---ELEVENLABS SCRIPT---
+A single-narrator script ready to paste into ElevenLabs.
+
+${ELEVENLABS_SCRIPT_NOTES}
+
+Voice rules (follow closely):
+${voiceBlock}
+
+${length}
+Write ONLY the words to be spoken — no stage directions, no headers, no bullets.`
+}

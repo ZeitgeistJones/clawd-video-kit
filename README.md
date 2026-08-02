@@ -8,8 +8,8 @@ Private video production tool for the Clawd Explains YouTube channel.
 - Pulls your Clawd Explains YouTube videos
 - Gap analysis: finds uncovered + stale repos (local name matching — no LLM quota)
 - Repomixes selected repo server-side
-- Generates NotebookLM source doc + YouTube description via Gemini
-- **Cinematic lane** — multi-source NotebookLM pack (repo pack + emphasis + holder thesis) + normie narrator customize paste
+- Generates NotebookLM source doc + ElevenLabs spoken script + YouTube description via Gemini
+- **Cinematic lane** — multi-source NotebookLM pack (repo pack + emphasis + holder thesis) + normie narrator customize paste + ElevenLabs script
 - `/larva-video` — larv.ai forum post → video pack
 - `/x-video` — X post/article URL + optional author context → video pack
 - Draft lane — storyboard, B-roll, strip audio from NotebookLM MP4, Remotion still draft

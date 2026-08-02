@@ -56,3 +56,15 @@ export function buildNormieVoiceBlock(extraRules: string[] = []): string {
 export function buildNormieVoiceBlockWithNoSlang(): string {
   return buildNormieVoiceBlock([NO_GEN_Z_SLANG_RULE]);
 }
+
+/**
+ * Clarity like explaining to a sharp ~10-year-old — without baby-talk or kid references.
+ * Adults should still feel respected; nobody should feel talked down to.
+ */
+export const ELEVENLABS_CLEAR_VOICE_RULE =
+  'Clarity bar: a sharp ten-year-old could follow the ideas. Do NOT use kid references, baby talk, or condescending "let me explain this slowly" energy. Speak with respect — adults should still feel treated like adults. Short clear sentences. Everyday words. If a tech term is needed, explain it in plain language once.';
+
+/** Voice block for ElevenLabs read-aloud scripts. */
+export function buildElevenLabsVoiceBlock(): string {
+  return buildNormieVoiceBlock([NO_GEN_Z_SLANG_RULE, ELEVENLABS_CLEAR_VOICE_RULE]);
+}

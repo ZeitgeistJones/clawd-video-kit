@@ -24,6 +24,8 @@ export type GenerationOutputs = {
   notebookDoc?: string
   youtubeDesc?: string
   thumbnailPrompt?: string
+  /** Spoken script for ElevenLabs / TTS — clear, non-condescending */
+  elevenLabsScript?: string
   /** Full packed repo text for download as NLM source 1 (cinematic) */
   packedRepo?: string
   generatedAt: string

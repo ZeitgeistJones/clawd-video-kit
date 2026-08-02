@@ -204,6 +204,7 @@ export default function Home() {
         emphasisSource,
         holderThesisSource,
         youtubeDesc,
+        elevenLabsScript,
         thumbnailPrompt,
         mascotScene,
         focusGuidance,
@@ -244,6 +245,7 @@ export default function Home() {
         duration: isCinematic ? 'full' : opts.duration,
         isHeyGen: isCinematic ? false : opts.isHeyGen,
         generatedAt,
+        elevenLabsScript,
         ...(isCinematic
           ? {
               emphasisSource: emphasis,
@@ -370,6 +372,7 @@ export default function Home() {
             holderThesisSource={output.holderThesisSource}
             packedRepo={output.packedRepo}
             youtubeDesc={output.youtubeDesc}
+            elevenLabsScript={output.elevenLabsScript}
             thumbnailPrompt={output.thumbnailPrompt}
             cinematicCustomizePaste={output.cinematicCustomizePaste}
             narratorBlock={output.narratorBlock}
