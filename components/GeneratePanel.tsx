@@ -132,8 +132,9 @@ export default function GeneratePanel({
         </div>
         {lane === 'cinematic' && (
           <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 8, lineHeight: 1.5 }}>
-            Dual source: download <strong style={{ color: 'var(--text-muted)' }}>repo pack</strong> +{' '}
-            <strong style={{ color: 'var(--text-muted)' }}>emphasis</strong>, then paste the{' '}
+            Dual source: download <strong style={{ color: 'var(--text-muted)' }}>repo pack</strong>,{' '}
+            <strong style={{ color: 'var(--text-muted)' }}>emphasis</strong>, and{' '}
+            <strong style={{ color: 'var(--text-muted)' }}>holder thesis</strong>, then paste the{' '}
             <strong style={{ color: 'var(--text-muted)' }}>normie customize</strong> into Studio → Video Overview → Cinematic.
           </div>
         )}

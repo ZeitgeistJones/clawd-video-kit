@@ -7,6 +7,7 @@ import {
   ensureOfficialLinks,
   CINEMATIC_PRODUCTION_NOTES,
   CINEMATIC_EMPHASIS_RULES,
+  CINEMATIC_HOLDER_THESIS_RULES,
   buildCinematicCustomizePaste,
 } from '@/data/style-bible'
 import { buildNormieVoiceBlockWithNoSlang } from '@/data/normieVoice'
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
 
 IMPORTANT: The project is called "clawd" (rhymes with "clawed"). Never spell it "claude".
 IMPORTANT: clawdbotatg builds these repos. Austin is the kill switch, not the builder.
-IMPORTANT: Dual-source workflow — the user uploads the FULL packed repo as source 1. You write source 2 (emphasis) + FOCUS/FEEL for the customize box. Do NOT write animation-director tech dumps (no hex colors, no RPC/CORS/VRF shot lists).
+IMPORTANT: Multi-source workflow — user uploads (1) FULL packed repo (2) EMPHASIS SOURCE (3) HOLDER THESIS SOURCE. You write sources 2–3 + FOCUS/FEEL. Do NOT write animation-director tech dumps (no hex colors, no RPC/CORS/VRF shot lists).
 
 ${STYLE_BIBLE}
 
@@ -85,9 +86,20 @@ ${CINEMATIC_EMPHASIS_RULES}
 Then: what this repo is in plain + lightly specific terms; 4–7 key parts to prioritize; what to skip in the spoken video; clawdbotatg attribution; brief disclaimer pointers.
 NOT a second full technical essay. NOT a timed script. No chapter headers required — flowing prose OK.
 
+---HOLDER THESIS SOURCE---
+A dedicated NotebookLM source (~300–600 words) on why this build matters to $CLAWD / clawd holders — direct or indirect.
+Must include near the top (paraphrase OK):
+${CINEMATIC_HOLDER_THESIS_RULES}
+
+Structure with clear labeled points. Every material claim must carry tags in-line, e.g. [DIRECT · LIVE], [INDIRECT · PLANNED], [INDIRECT · SPECULATIVE].
+Cover: what is live today for holders (if anything), what is only adjacent/indirect, what is planned vs speculative.
+If the holder link is thin, say so honestly under SPECULATIVE or as a weak-link note.
+No price talk. No guaranteed outcomes. Credit builds to clawdbotatg.
+
 ---FOCUS GUIDANCE---
-Plain-English FOCUS lines for the customize box (under 120 words). What to lead with, what matters for outsiders, what to skip even if it is in the repo pack.
+Plain-English FOCUS lines for the customize box (under 140 words). What to lead with, what matters for outsiders, what to skip even if it is in the repo pack.
 Must include: do not walk through proxies, CORS, selectors, or file dumps.
+May note holder stakes briefly and that speculative / planned points must sound speculative — not like facts.
 No markdown headers inside this section. Short lines or short paragraphs OK.
 
 ---FEEL NOTES---
@@ -111,10 +123,11 @@ Return every section with its ---HEADER--- exactly as specified.`
 
     const text = await generateText({
       prompt,
-      maxOutputTokens: 5000,
+      maxOutputTokens: 6000,
     })
 
-    const emphasisSource = section(text, '---EMPHASIS SOURCE---', '---FOCUS GUIDANCE---')
+    const emphasisSource = section(text, '---EMPHASIS SOURCE---', '---HOLDER THESIS SOURCE---')
+    const holderThesisSource = section(text, '---HOLDER THESIS SOURCE---', '---FOCUS GUIDANCE---')
     const focusGuidance = section(text, '---FOCUS GUIDANCE---', '---FEEL NOTES---')
     const feelNotes = section(text, '---FEEL NOTES---', '---YOUTUBE DESCRIPTION---')
     const youtubeDesc = ensureOfficialLinks(
@@ -122,10 +135,11 @@ Return every section with its ---HEADER--- exactly as specified.`
     )
     const thumbnailPrompt = section(text, '---THUMBNAIL PROMPT---')
 
-    if (!emphasisSource || !focusGuidance) {
+    if (!emphasisSource || !focusGuidance || !holderThesisSource) {
       return NextResponse.json(
         {
-          error: 'Cinematic generation incomplete — missing emphasis source or focus guidance',
+          error:
+            'Cinematic generation incomplete — missing emphasis, holder thesis, or focus guidance',
           raw: text.slice(0, 500),
         },
         { status: 500 },
@@ -141,7 +155,8 @@ Return every section with its ---HEADER--- exactly as specified.`
     return NextResponse.json({
       lane: 'cinematic',
       emphasisSource,
-      /** @deprecated alias — emphasis is source 2; pack is source 1 */
+      holderThesisSource,
+      /** alias — emphasis is source 2; pack is source 1 */
       notebookDoc: emphasisSource,
       focusGuidance,
       feelNotes,

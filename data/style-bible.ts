@@ -233,15 +233,16 @@ Tone: cool, personable, genuinely engaged — no try-hard slang. Credit builds t
 Optional: if NotebookLM suggests focus buttons, pick whichever fits the repo topic best, or skip all of them.`
 
 /**
- * NotebookLM Cinematic Video Overview — dual-source + normie narrator customize.
- * Full repo pack = source 1; emphasis brief = source 2; customize paste steers the messenger only.
+ * NotebookLM Cinematic Video Overview — multi-source + normie narrator customize.
+ * Source 1 = full repo pack; source 2 = emphasis brief; source 3 = CLAWD holder relevance.
+ * Customize paste steers the messenger only.
  */
 export const CINEMATIC_PRODUCTION_NOTES = `
-== NOTEBOOKLM CINEMATIC VIDEO OVERVIEW (DUAL SOURCE) ==
+== NOTEBOOKLM CINEMATIC VIDEO OVERVIEW (MULTI SOURCE) ==
 
 TARGET PRODUCT
 - NotebookLM Studio → Video Overview → Format: Cinematic (English only)
-- User will upload TWO sources: (1) full packed repo file (2) the EMPHASIS SOURCE you write
+- User will upload THREE sources: (1) full packed repo (2) EMPHASIS SOURCE (3) HOLDER THESIS SOURCE
 - Customize / steering box steers the NARRATOR in plain English — NOT an animation shot list
 
 EMPHASIS SOURCE (source 2 — companion to the full repo pack)
@@ -253,9 +254,22 @@ EMPHASIS SOURCE (source 2 — companion to the full repo pack)
 - Brief disclaimer pointers OK (not affiliated, not financial advice, DYOR, verify sources)
 - Do NOT dump hex colors, RPC/CORS/VRF tours, or architecture walkthroughs into the spoken video instructions
 
+HOLDER THESIS SOURCE (source 3 — why this matters to $CLAWD holders)
+- Dedicated NotebookLM source about holder relevance: direct vs indirect
+- Every claim MUST be tagged clearly as one of: DIRECT, INDIRECT, LIVE, PLANNED, SPECULATIVE (combine tags when needed, e.g. INDIRECT + LIVE)
+- DIRECT = clearly strengthens clawd / $CLAWD / clawdbotatg track record or utility in a concrete way
+- INDIRECT = adjacent ecosystem / infrastructure / reputation benefit that is not a direct token utility
+- LIVE = already shipped / observable in the repo or known product today
+- PLANNED = stated intent or roadmap-ish, not fully live
+- SPECULATIVE = inference, hope, or "could" — never present as fact
+- Be honest when the link to holders is weak; say so instead of inventing thesis
+- Prudent language — no price talk, no guaranteed outcomes
+- ~300–600 words; structured so NotebookLM can quote the tags
+
 CUSTOMIZE BOX (narrator only — Talk Normie "normie" / smart friend)
 - NARRATOR block is provided by the host app (normie voice kit) — you generate FOCUS + FEEL only
 - FOCUS: plain-English what to hit / skip for outsiders; forbid walking through proxies, CORS, selectors, file dumps even if in the pack
+- FOCUS may briefly note holder stakes in plain English and that speculative points must sound speculative
 - FEEL: 2–4 everyday visual lines max (dark, clear, modern) — NO hex codes, NO glassmorphism, NO animation director tech
 - Never Gen Z slang; never whitepaper voice; never corporate hype
 `.trim()
@@ -264,6 +278,12 @@ export const CINEMATIC_EMPHASIS_RULES = `
 This file is a steering companion to the full repository pack uploaded alongside it.
 Use the pack for accuracy and missing context. Do NOT turn the video into a reading of the pack.
 Spoken narration must stay plain English for smart people who are not developers.
+`.trim()
+
+export const CINEMATIC_HOLDER_THESIS_RULES = `
+This file explains why this build may matter to $CLAWD / clawd holders — directly or indirectly.
+Tag every material point as DIRECT or INDIRECT, and as LIVE, PLANNED, or SPECULATIVE (combine as needed).
+Never present speculative or planned items as if they are live facts. No price predictions.
 `.trim()
 
 export type CinematicPackageFields = {

@@ -202,6 +202,7 @@ export default function Home() {
         shortBrief,
         notebookDoc,
         emphasisSource,
+        holderThesisSource,
         youtubeDesc,
         thumbnailPrompt,
         mascotScene,
@@ -246,6 +247,7 @@ export default function Home() {
         ...(isCinematic
           ? {
               emphasisSource: emphasis,
+              holderThesisSource,
               notebookDoc: emphasis,
               youtubeDesc,
               thumbnailPrompt,
@@ -365,6 +367,7 @@ export default function Home() {
             shortBrief={output.shortBrief}
             notebookDoc={output.notebookDoc}
             emphasisSource={output.emphasisSource}
+            holderThesisSource={output.holderThesisSource}
             packedRepo={output.packedRepo}
             youtubeDesc={output.youtubeDesc}
             thumbnailPrompt={output.thumbnailPrompt}

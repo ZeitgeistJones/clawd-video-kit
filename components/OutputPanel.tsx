@@ -15,6 +15,7 @@ type Props = {
   shortBrief?: string
   notebookDoc?: string
   emphasisSource?: string
+  holderThesisSource?: string
   packedRepo?: string
   youtubeDesc?: string
   thumbnailPrompt?: string
@@ -174,6 +175,7 @@ export default function OutputPanel({
   shortBrief,
   notebookDoc,
   emphasisSource,
+  holderThesisSource,
   packedRepo,
   youtubeDesc,
   thumbnailPrompt,
@@ -211,7 +213,7 @@ export default function OutputPanel({
         id="script-section"
         title="1 · script"
         hint={isCinematic
-          ? 'Dual source: repo pack + emphasis → normie customize paste → publish'
+          ? 'Sources: repo pack + emphasis + holder thesis → normie customize paste → publish'
           : 'NotebookLM doc, description, focus, thumbnail / mascot'}
       />
 
@@ -229,6 +231,7 @@ export default function OutputPanel({
           <ol style={{ margin: 0, paddingLeft: 18 }}>
             <li>Upload <strong style={{ color: 'var(--text-muted)' }}>repo pack (source 1)</strong></li>
             <li>Upload <strong style={{ color: 'var(--text-muted)' }}>emphasis source (source 2)</strong></li>
+            <li>Upload <strong style={{ color: 'var(--text-muted)' }}>holder thesis (source 3)</strong></li>
             <li>Studio → Video Overview → <strong style={{ color: 'var(--text-muted)' }}>Cinematic</strong> → paste customize</li>
           </ol>
         </div>
@@ -250,6 +253,14 @@ export default function OutputPanel({
               content={emphasis}
               note="steering companion — what to prioritize; do not narrate the whole pack"
               downloadName={`emphasis-${repoName || 'repo'}.md`}
+            />
+          )}
+          {holderThesisSource && (
+            <CopyBlock
+              label="holder thesis (source 3)"
+              content={holderThesisSource}
+              note="why it matters to $CLAWD holders — tagged DIRECT/INDIRECT · LIVE/PLANNED/SPECULATIVE"
+              downloadName={`holder-thesis-${repoName || 'repo'}.md`}
             />
           )}
           {cinematicCustomizePaste && (

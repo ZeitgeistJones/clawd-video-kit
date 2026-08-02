@@ -9,7 +9,7 @@ Private video production tool for the Clawd Explains YouTube channel.
 - Gap analysis: finds uncovered + stale repos (local name matching — no LLM quota)
 - Repomixes selected repo server-side
 - Generates NotebookLM source doc + YouTube description via Gemini
-- **Cinematic lane** — dual-source NotebookLM pack (repo pack + emphasis) + normie narrator customize paste
+- **Cinematic lane** — multi-source NotebookLM pack (repo pack + emphasis + holder thesis) + normie narrator customize paste
 - `/larva-video` — larv.ai forum post → video pack
 - `/x-video` — X post/article URL + optional author context → video pack
 - Draft lane — storyboard, B-roll, strip audio from NotebookLM MP4, Remotion still draft
@@ -64,10 +64,10 @@ Compact aliases also work (`GITHUBTOKEN`, `YOUTUBEAPIKEY`, `POSTGRESURL`, etc.).
 | Lane | Generate API | NotebookLM use |
 |------|----------------|----------------|
 | Classic | `/api/generate` | Source doc + custom focus → Audio Overview |
-| Cinematic | `/api/generate-cinematic` | **Repo pack** + **emphasis source** + **normie customize paste** → Video Overview → Cinematic |
+| Cinematic | `/api/generate-cinematic` | **Repo pack** + **emphasis** + **holder thesis** + **normie customize paste** → Video Overview → Cinematic |
 | Draft | `/api/generate` then storyboard/render | Optional NLM MP4 for narration audio only |
 
-Cinematic is dual-source: upload the downloaded repo pack (source 1) and emphasis brief (source 2). The customize paste steers the **narrator** in plain English (Talk Normie “normie” voice in `data/normieVoice.ts`) — not an animation tech dump. Cinematic has no Visual Style carousel; light FEEL lines live in the paste.
+Cinematic is multi-source: upload the downloaded repo pack (source 1), emphasis brief (source 2), and holder thesis (source 3 — DIRECT/INDIRECT · LIVE/PLANNED/SPECULATIVE). The customize paste steers the **narrator** in plain English (Talk Normie “normie” voice in `data/normieVoice.ts`) — not an animation tech dump. Cinematic has no Visual Style carousel; light FEEL lines live in the paste.
 
 ## Storyboard (faceless pre-production)
 

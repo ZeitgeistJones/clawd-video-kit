@@ -6,6 +6,8 @@ export type WorkflowLane = 'classic' | 'cinematic' | 'draft'
 export type CinematicOutputs = {
   /** Source 2 — steering companion to the full repo pack */
   emphasisSource?: string
+  /** Source 3 — why this matters to $CLAWD holders (tagged direct/indirect, live/planned/speculative) */
+  holderThesisSource?: string
   /** Fixed normie voice block used in customize paste */
   narratorBlock?: string
   focusGuidance?: string
