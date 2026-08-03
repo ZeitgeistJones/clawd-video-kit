@@ -41,16 +41,44 @@ async function fetchRepoContents(repoName: string, path = ''): Promise<string> {
 
 export async function POST(req: Request) {
   try {
-    const { repoName } = await req.json()
+    const { repoName, light = false } = await req.json()
     const repoUrl = `https://github.com/clawdbotatg/${repoName}`
+    const headers = {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github+json',
+    }
     const metaRes = await fetch(`https://api.github.com/repos/clawdbotatg/${repoName}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github+json',
-      },
+      headers,
     })
     const meta = await metaRes.json()
     const header = `Repository: ${repoName}\nDescription: ${meta.description || 'No description'}\nLanguage: ${meta.language || 'Unknown'}\nStars: ${meta.stargazers_count}\nLast pushed: ${meta.pushed_at}\nURL: ${repoUrl}\n`
+
+    // Light pack for thumbnail-only — meta + README, skip full tree walk.
+    if (light) {
+      let readme = ''
+      for (const name of ['README.md', 'readme.md', 'README', 'Readme.md']) {
+        const r = await fetch(
+          `https://api.github.com/repos/clawdbotatg/${repoName}/contents/${name}`,
+          { headers },
+        )
+        if (!r.ok) continue
+        const data = await r.json()
+        if (data?.download_url) {
+          try {
+            const text = await (await fetch(data.download_url)).text()
+            readme = text.slice(0, 12000)
+          } catch {}
+        } else if (typeof data?.content === 'string') {
+          try {
+            readme = Buffer.from(data.content, 'base64').toString('utf8').slice(0, 12000)
+          } catch {}
+        }
+        if (readme) break
+      }
+      const packed = header + (readme ? `\n\n=== README ===\n${readme}` : '\n\n[no README found]')
+      return NextResponse.json({ packed, repoName, repoUrl, light: true })
+    }
+
     const contents = await fetchRepoContents(repoName)
     const packed = header + contents
     return NextResponse.json({ packed, repoName, repoUrl })

@@ -162,20 +162,107 @@ export default function Home() {
     extraContext: string
     duration: Duration
     isHeyGen: boolean
+    thumbnailOnly?: boolean
     forceRegenerate?: boolean
   }) {
     setGenerating(true)
     setError('')
-    if (opts.forceRegenerate) setOutput(null)
+    // Thumbnail-only should not wipe an existing script package.
+    if (opts.forceRegenerate && !opts.thumbnailOnly) setOutput(null)
 
     try {
       const packRes = await fetch('/api/pack', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repoName: opts.repoName }),
+        body: JSON.stringify({ repoName: opts.repoName, light: Boolean(opts.thumbnailOnly) }),
       })
       const { packed, repoUrl, error: packErr } = await packRes.json()
       if (packErr) throw new Error(packErr)
+
+      if (opts.thumbnailOnly) {
+        const prev = output
+        const genRes = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            packed,
+            repoName: opts.repoName,
+            repoUrl,
+            extraContext: opts.extraContext,
+            duration: opts.duration === 'short' ? 'short' : 'full',
+            thumbnailOnly: true,
+            lockMascot: opts.generatePfp,
+            mascotScene: opts.generatePfp ? undefined : prev?.pfpPrompt,
+          }),
+        })
+        const genData = await genRes.json()
+        if (genData.error) throw new Error(genData.error)
+
+        const { thumbnailPrompt, mascotScene } = genData
+        const generatedAt = new Date().toISOString()
+        let pfpImage: string | undefined
+        let pfpPrompt: string | undefined = mascotScene || undefined
+
+        if (opts.generatePfp) {
+          const pfpRes = await fetch('/api/pfp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              repoName: opts.repoName,
+              notebookDoc: packed,
+              prompt: mascotScene || undefined,
+            }),
+          })
+          const pfpData = await pfpRes.json()
+          if (pfpData.imageData) {
+            pfpImage = pfpData.imageData
+            pfpPrompt = pfpData.prompt || mascotScene || undefined
+          } else if (pfpData.error) {
+            setError('PFP generation failed: ' + pfpData.error)
+          }
+        } else if (prev?.pfpImage && prev?.pfpPrompt) {
+          pfpImage = prev.pfpImage
+          pfpPrompt = prev.pfpPrompt
+        }
+
+        const thumbDuration: Duration = opts.duration === 'short' ? 'short' : (prev?.duration || 'full')
+        const cachePayload: GenerationOutputs = {
+          ...(prev
+            ? {
+                lane: prev.lane,
+                duration: thumbDuration,
+                isHeyGen: prev.isHeyGen,
+                shortBrief: prev.shortBrief,
+                notebookDoc: prev.notebookDoc,
+                youtubeDesc: prev.youtubeDesc,
+                elevenLabsScript: prev.elevenLabsScript,
+                emphasisSource: prev.emphasisSource,
+                holderThesisSource: prev.holderThesisSource,
+                focusGuidance: prev.focusGuidance,
+                feelNotes: prev.feelNotes,
+                narratorBlock: prev.narratorBlock,
+                cinematicCustomizePaste: prev.cinematicCustomizePaste,
+              }
+            : {
+                lane: opts.lane === 'draft' ? 'classic' : opts.lane,
+                duration: opts.duration === 'short' ? 'short' : 'full',
+                isHeyGen: false,
+              }),
+          thumbnailPrompt,
+          generatedAt,
+        }
+
+        const newOutput: OutputState = {
+          ...cachePayload,
+          pfpImage,
+          pfpPrompt,
+          packedRepo: prev?.packedRepo,
+        }
+        setOutput(newOutput)
+        await saveGenerationCache(opts.repoName, cachePayload)
+        setGenerating(false)
+        return
+      }
 
       const isCinematic = opts.lane === 'cinematic'
       const genRes = await fetch(isCinematic ? '/api/generate-cinematic' : '/api/generate', {

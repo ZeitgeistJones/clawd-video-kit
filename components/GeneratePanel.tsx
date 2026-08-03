@@ -21,6 +21,7 @@ type Props = {
     extraContext: string
     duration: Duration
     isHeyGen: boolean
+    thumbnailOnly?: boolean
     forceRegenerate?: boolean
   }) => void
   generating: boolean
@@ -39,8 +40,14 @@ const DURATION_OPTIONS: { value: Duration; label: string; hint: string }[] = [
   { value: 'short', label: 'Short', hint: '30–45 sec' },
 ]
 
-function generateButtonLabel(lane: WorkflowLane, duration: Duration, generating: boolean) {
+function generateButtonLabel(
+  lane: WorkflowLane,
+  duration: Duration,
+  generating: boolean,
+  thumbnailOnly: boolean,
+) {
   if (generating) return 'generating...'
+  if (thumbnailOnly) return '⚡ generate thumbnail + prompt'
   if (lane === 'cinematic') return '⚡ generate cinematic package'
   if (lane === 'draft') return '⚡ generate script for draft'
   if (duration === 'short') return '⚡ generate short brief'
@@ -65,18 +72,20 @@ export default function GeneratePanel({
   const [previousVideoDescription, setPreviousVideoDescription] = useState('')
   const [showPrevious, setShowPrevious] = useState(false)
   const [generatePfp, setGeneratePfp] = useState(false)
+  const [thumbnailOnly, setThumbnailOnly] = useState(false)
   const [extraContext, setExtraContext] = useState('')
 
   function buildOpts(forceRegenerate?: boolean) {
     return {
       repoName: selectedRepo.trim(),
       lane,
-      includeMetaHook,
-      previousVideoDescription,
-      generatePfp: lane === 'draft' ? false : generatePfp,
+      includeMetaHook: thumbnailOnly ? false : includeMetaHook,
+      previousVideoDescription: thumbnailOnly ? '' : previousVideoDescription,
+      generatePfp: lane === 'draft' && !thumbnailOnly ? false : generatePfp,
       extraContext,
-      duration: lane === 'cinematic' ? 'full' as Duration : duration,
-      isHeyGen: lane !== 'classic' || duration === 'short' ? false : isHeyGen,
+      duration: lane === 'cinematic' && !thumbnailOnly ? 'full' as Duration : duration,
+      isHeyGen: thumbnailOnly || lane !== 'classic' || duration === 'short' ? false : isHeyGen,
+      thumbnailOnly,
       forceRegenerate,
     }
   }
@@ -167,7 +176,7 @@ export default function GeneratePanel({
         />
       </div>
 
-      {lane === 'classic' && (
+      {lane === 'classic' && !thumbnailOnly && (
         <div style={{ marginBottom: 14 }}>
           <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>
             duration
@@ -186,6 +195,49 @@ export default function GeneratePanel({
                   background: duration === opt.value ? 'var(--accent-dim)' : 'var(--surface-2)',
                   color: duration === opt.value ? 'var(--accent)' : 'var(--text-muted)',
                   border: `1px solid ${duration === opt.value ? 'var(--accent)' : 'var(--border-strong)'}`,
+                  borderRadius: 'var(--radius)',
+                  padding: '8px 6px',
+                  fontSize: 11,
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font)',
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontWeight: 600 }}>{opt.label}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 2 }}>{opt.hint}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {thumbnailOnly && (
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>
+            thumbnail format
+          </label>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {([
+              { value: 'full' as Duration, label: '16:9', hint: 'longform' },
+              { value: 'short' as Duration, label: '9:16', hint: 'shorts' },
+            ]).map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => onDurationChange(opt.value)}
+                style={{
+                  flex: 1,
+                  background: duration === opt.value || (opt.value === 'full' && duration === 'medium')
+                    ? 'var(--accent-dim)'
+                    : 'var(--surface-2)',
+                  color: duration === opt.value || (opt.value === 'full' && duration === 'medium')
+                    ? 'var(--accent)'
+                    : 'var(--text-muted)',
+                  border: `1px solid ${
+                    duration === opt.value || (opt.value === 'full' && duration === 'medium')
+                      ? 'var(--accent)'
+                      : 'var(--border-strong)'
+                  }`,
                   borderRadius: 'var(--radius)',
                   padding: '8px 6px',
                   fontSize: 11,
@@ -227,7 +279,19 @@ export default function GeneratePanel({
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-        {lane === 'classic' && (
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={thumbnailOnly}
+            onChange={e => setThumbnailOnly(e.target.checked)}
+            style={{ accentColor: 'var(--accent)', width: 14, height: 14 }}
+          />
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            thumbnail only <span style={{ color: 'var(--text-dim)' }}>(prompt + optional mascot — skips scripts/docs)</span>
+          </span>
+        </label>
+
+        {lane === 'classic' && !thumbnailOnly && (
         <label style={{
           display: 'flex', alignItems: 'center', gap: 10,
           cursor: duration === 'short' ? 'not-allowed' : 'pointer',
@@ -246,6 +310,7 @@ export default function GeneratePanel({
         </label>
         )}
 
+        {!thumbnailOnly && (
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
           <input
             type="checkbox"
@@ -257,7 +322,9 @@ export default function GeneratePanel({
             include meta-research hook <span style={{ color: 'var(--text-dim)' }}>(clawd research agent was used)</span>
           </span>
         </label>
+        )}
 
+        {!thumbnailOnly && (
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
           <input
             type="checkbox"
@@ -269,8 +336,9 @@ export default function GeneratePanel({
             episode continuity <span style={{ color: 'var(--text-dim)' }}>(paste previous video description)</span>
           </span>
         </label>
+        )}
 
-        {lane !== 'draft' && (
+        {(lane !== 'draft' || thumbnailOnly) && (
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
           <input
             type="checkbox"
@@ -285,7 +353,7 @@ export default function GeneratePanel({
         )}
       </div>
 
-      {showPrevious && (
+      {showPrevious && !thumbnailOnly && (
         <div style={{ marginBottom: 16 }}>
           <textarea
             value={previousVideoDescription}
@@ -326,7 +394,7 @@ export default function GeneratePanel({
             opacity: !selectedRepo.trim() ? 0.4 : 1,
           }}
         >
-          {generateButtonLabel(lane, duration, generating)}
+          {generateButtonLabel(lane, duration, generating, thumbnailOnly)}
         </button>
         {hasOutput && (
           <button

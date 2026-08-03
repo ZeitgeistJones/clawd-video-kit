@@ -38,6 +38,30 @@ ${THUMBNAIL_CREATIVE_NOTES}
 ${notes}`
 }
 
+function buildThumbnailOnlyPrompt(
+  repoName: string,
+  repoUrl: string,
+  packed: string,
+  aspect: '16:9' | '9:16',
+  extraSection: string,
+  mascotScene?: string,
+) {
+  const skim = packed.length > 10000 ? packed.slice(0, 10000) + '\n\n[truncated]' : packed
+  return `You are writing ONLY a YouTube thumbnail image prompt for a Clawd Explains video about the clawdbotatg GitHub repo: ${repoName} (${repoUrl}).
+
+IMPORTANT: The project is called "clawd" (rhymes with "clawed"). Never spell it "claude".
+Do NOT write a script, description, or NotebookLM doc — thumbnail prompt only.
+
+Repo skim (for vibe / subject matter):
+${skim}${extraSection}
+
+Generate ONE output:
+
+${buildThumbnailSection(aspect, mascotScene)}
+
+Return the section with the ---THUMBNAIL PROMPT--- header. Write a ready-to-paste prompt — specific scene tied to this repo, not generic AI slop.`
+}
+
 function buildDocSection(
   isHeyGen: boolean,
   duration: 'full' | 'medium',
@@ -155,6 +179,7 @@ export async function POST(req: Request) {
       extraContext,
       duration = 'full',
       isHeyGen = false,
+      thumbnailOnly = false,
       mascotScene: providedScene,
       lockMascot = false,
     } = await req.json()
@@ -180,6 +205,29 @@ export async function POST(req: Request) {
     }
 
     const dur = duration as Duration
+    const aspect: '16:9' | '9:16' = dur === 'short' ? '9:16' : '16:9'
+
+    if (thumbnailOnly) {
+      const prompt = buildThumbnailOnlyPrompt(
+        repoName,
+        repoUrl,
+        packed || '',
+        aspect,
+        extraSection,
+        mascotScene,
+      )
+      const text = await generateText({
+        prompt,
+        maxOutputTokens: 1200,
+      })
+      const thumbnailPrompt = text.replace('---THUMBNAIL PROMPT---', '').trim()
+      return NextResponse.json({
+        thumbnailOnly: true,
+        thumbnailPrompt,
+        mascotScene: mascotScene || null,
+      })
+    }
+
     const prompt = dur === 'short'
       ? buildShortPrompt(repoName, repoUrl, packed, metaSection, previousContext, extraSection, mascotScene)
       : buildDocPrompt(repoName, repoUrl, packed, dur, isHeyGen, metaSection, previousContext, extraSection, mascotScene)
