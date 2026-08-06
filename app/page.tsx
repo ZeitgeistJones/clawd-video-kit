@@ -101,6 +101,16 @@ export default function Home() {
       const res = await fetch('/api/gap-cache')
       const { cache } = await res.json()
       if (cache) {
+        // #region agent log
+        const gapsArr = Array.isArray(cache.gaps) ? cache.gaps : []
+        const counts = { covered: 0, stale: 0, uncovered: 0 }
+        for (const g of gapsArr) {
+          if (g?.status === 'covered') counts.covered++
+          else if (g?.status === 'stale') counts.stale++
+          else counts.uncovered++
+        }
+        fetch('http://127.0.0.1:7343/ingest/1a5867e9-c2d9-483f-bd01-1924980395c6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2bdc0a'},body:JSON.stringify({sessionId:'2bdc0a',hypothesisId:'B',location:'page.tsx:loadCache',message:'loaded gap cache',data:{scannedAt:cache.scanned_at,total:gapsArr.length,...counts,sampleCovered:gapsArr.filter((g:GapEntry)=>g.status==='covered').slice(0,15).map((g:GapEntry)=>({repo:g.repoName,video:g.matchedVideo?.title}))},timestamp:Date.now()})}).catch(()=>{})
+        // #endregion
         setGaps(cache.gaps)
         setLastScanned(cache.scanned_at)
       }
@@ -196,6 +206,9 @@ export default function Home() {
           }),
         })
         const genData = await genRes.json()
+        // #region agent log
+        if (genData.error) fetch('http://127.0.0.1:7343/ingest/1a5867e9-c2d9-483f-bd01-1924980395c6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2bdc0a'},body:JSON.stringify({sessionId:'2bdc0a',hypothesisId:'F,G',location:'page.tsx:generate:thumb',message:'generate API error',data:{error:String(genData.error).slice(0,500),status:genRes.status,repo:opts.repoName,lane:opts.lane},timestamp:Date.now()})}).catch(()=>{})
+        // #endregion
         if (genData.error) throw new Error(genData.error)
 
         const { thumbnailPrompt, mascotScene } = genData
@@ -283,6 +296,9 @@ export default function Home() {
         }),
       })
       const genData = await genRes.json()
+      // #region agent log
+      if (genData.error) fetch('http://127.0.0.1:7343/ingest/1a5867e9-c2d9-483f-bd01-1924980395c6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2bdc0a'},body:JSON.stringify({sessionId:'2bdc0a',hypothesisId:'F,G',location:'page.tsx:generate:main',message:'generate API error',data:{error:String(genData.error).slice(0,500),status:genRes.status,repo:opts.repoName,lane:opts.lane,cinematic:isCinematic},timestamp:Date.now()})}).catch(()=>{})
+      // #endregion
       if (genData.error) throw new Error(genData.error)
 
       const {
